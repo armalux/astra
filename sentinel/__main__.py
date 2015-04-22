@@ -50,6 +50,10 @@ for fname in os.listdir(apps_directory):
     applications[module_name] = app_class
 
 arguments = parser.parse_args()
+if not hasattr(arguments, 'application'):
+    parser.print_help()
+    exit(0)
+
 app_class = applications[arguments.application]
 for argument,value in arguments.__dict__.items():
     setattr(app_class, argument, value)
