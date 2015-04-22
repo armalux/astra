@@ -1,4 +1,4 @@
-from ..framework import Application, ServiceUser, SingletonServiceProvider
+from ..framework import Application, ServiceUser, SingletonServiceProvider, Forker, Callback
 
 
 class Greeter(ServiceUser):
@@ -30,6 +30,9 @@ class HelloApplication(Application):
         Say "Hello, <name>!" as required.
         '''
         parser.add_argument('name', help='To whom to say hello.')
+        parser.add_argument('-c', '--count', type=int, help='The number of processes to fork.', default=1)
 
     def run(self):
-        self.services.greeter.greet()
+        cb = Callback(self.services.greeter.greet)
+        f = Forker(*(cb*self.count))
+        f.fork()
