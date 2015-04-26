@@ -25,13 +25,15 @@ applications = {}
 apps_directory = os.path.join(sentinel_path, 'apps')
 
 for fname in os.listdir(apps_directory):
-    if os.path.isdir(os.path.join(apps_directory, fname)):
+    if fname in ['__init__.py', '__main__.py', '__pycache__']:
         continue
 
-    module_name, extension = os.path.splitext(fname)
-
-    if extension != '.py':
-        continue
+    if os.path.isfile(os.path.join(apps_directory, fname)):
+        module_name, extension = os.path.splitext(fname)
+        if extension != '.py':
+            continue
+    else:
+        module_name = fname
 
     class_name = '{0}Application'.format(''.join([word.capitalize() for word in  module_name.replace('_',' ').split()]))
 
