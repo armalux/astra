@@ -33,6 +33,7 @@ class HelloApplication(Application):
         parser.add_argument('-c', '--count', type=int, help='The number of processes to fork.', default=1)
 
     def run(self):
+        print(self.services.random.bytes(100))
         cb = Callback(self.services.greeter.greet)
         f = Forker(*(cb*self.count))
         f.fork()

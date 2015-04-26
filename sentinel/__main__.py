@@ -43,7 +43,7 @@ for fname in os.listdir(apps_directory):
     app_class = getattr(module, class_name)
 
     subparser = subparsers.add_parser(module_name, help=app_class.__doc__)
-    subparser.description = app_class.help.__doc__
+    subparser.description = app_class.help.__doc__ if app_class.help.__doc__ != None else app_class.__doc__
     app_class.help(subparser)
     subparser.set_defaults(application=module_name)
 
