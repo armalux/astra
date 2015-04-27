@@ -1,4 +1,6 @@
-from ...framework import Application, Console, ConsoleCommand, SingletonObjectServiceProvider
+from ...framework.application import Application
+from ...framework.console import Console, ConsoleCommand
+from ...framework.service import SingletonServiceProvider
 import os
 from importlib import import_module
 
@@ -12,7 +14,7 @@ class ConsoleApplication(Application):
         self.console = Console()
         self.console.prompt = '{prompt} >'.format(prompt=self.console.red('sentinel'))
         self.console.input_sgr_codes = [33]
-        self.services.register(SingletonObjectServiceProvider('console', self.console))
+        self.services.register(SingletonServiceProvider('console', self.console))
 
     @staticmethod
     def help(parser):

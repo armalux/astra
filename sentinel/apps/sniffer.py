@@ -1,4 +1,4 @@
-from ..framework import Application
+from ..framework.application import Application
 
 class SnifferApplication(Application):
     '''

@@ -1,4 +1,6 @@
-from ..framework import Application, ServiceUser, SingletonServiceProvider, Forker, Callback
+from ..framework.application import Application
+from ..framework.service import ServiceUser, LazySingletonServiceProvider
+from ..framework.proc import Forker, Callback
 
 
 class Greeter(ServiceUser):
@@ -22,7 +24,7 @@ class HelloApplication(Application):
         '''
         Use this to perform any application initialization, such as registering custom services.
         '''
-        self.services.register(SingletonServiceProvider('greeter', Greeter, self.name))
+        self.services.register(LazySingletonServiceProvider('greeter', Greeter, self.name))
 
     @staticmethod
     def help(parser):

@@ -1,6 +1,6 @@
 import code
 import sentinel
-from sentinel.framework import ConsoleCommand
+from ....framework.console import ConsoleCommand
 
 class Hello(ConsoleCommand):
     @staticmethod

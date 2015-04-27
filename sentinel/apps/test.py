@@ -1,4 +1,4 @@
-from ..framework import Application
+from ..framework.application import Application
 import unittest
 
 class TestApplication(Application):

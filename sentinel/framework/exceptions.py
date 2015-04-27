@@ -1,0 +1,4 @@
+class MungerException(Exception):
+    pass
+
+
