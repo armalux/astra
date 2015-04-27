@@ -3,18 +3,18 @@
 from distutils.core import setup
 
 setup(
-    name='sentinel',
+    name='astra',
     version='0.1a',
-    description='The sentinel framework.',
+    description='The astra framework.',
     author='Eric Johnson',
-    author_email='eric.johnson@cs2.io',
+    author_email='megamandos@gmail.com',
     packages=[
-        'sentinel',
-        'sentinel.framework',
-        'sentinel.apps',
-        'sentinel.apps.console',
-        'sentinel.apps.console.commands',
-        'sentinel.user_services',
-        'sentinel.team_services',
+        'astra',
+        'astra.framework',
+        'astra.apps',
+        'astra.apps.console',
+        'astra.apps.console.commands',
+        'astra.user_services',
+        'astra.team_services',
     ]
 )
