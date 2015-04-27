@@ -1,5 +1,5 @@
 import code
-import sentinel
+import astra
 from ....framework.console import ConsoleCommand
 
 class Hello(ConsoleCommand):
@@ -33,7 +33,7 @@ class Python(ConsoleCommand):
             raise SystemExit()
 
         local = {
-            'sentinel': sentinel,
+            'astra': astra,
             'exit': return_function,
             'quit': return_function
         }

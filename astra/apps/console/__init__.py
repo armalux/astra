@@ -6,13 +6,13 @@ from importlib import import_module
 
 class ConsoleApplication(Application):
     '''
-    Launch the sentinel console.
+    Launch the astra console.
     '''
     __command_directory = None
 
     def __init__(self):
         self.console = Console()
-        self.console.prompt = '{prompt} >'.format(prompt=self.console.red('sentinel'))
+        self.console.prompt = '{prompt} >'.format(prompt=self.console.red('astra'))
         self.console.input_sgr_codes = [33]
         self.services.register(SingletonServiceProvider('console', self.console))
 

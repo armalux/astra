@@ -5,16 +5,16 @@ from importlib import import_module
 from argparse import ArgumentParser
 
 # Determine the directory this file sits in.
-sentinel_path = os.path.dirname(os.path.realpath(__file__))
+astra_path = os.path.dirname(os.path.realpath(__file__))
 
-# Determine what we are calling the sentinel package.
-sentinel_pkg_name = os.path.basename(sentinel_path)
+# Determine what we are calling the astra package.
+astra_pkg_name = os.path.basename(astra_path)
 
 # Insert the directory above this into the path.
-sys.path.insert(0, os.path.dirname(sentinel_path))
+sys.path.insert(0, os.path.dirname(astra_path))
 
-# Import the sentinel package
-sys.modules['sentinel'] = import_module(sentinel_pkg_name)
+# Import the astra package
+sys.modules['astra'] = import_module(astra_pkg_name)
 
 # Get our argument parser.
 parser = ArgumentParser()
@@ -22,7 +22,7 @@ subparsers = parser.add_subparsers()
 
 # Get ready to load the application help data.
 applications = {}
-apps_directory = os.path.join(sentinel_path, 'apps')
+apps_directory = os.path.join(astra_path, 'apps')
 
 for fname in os.listdir(apps_directory):
     if fname in ['__init__.py', '__main__.py', '__pycache__']:
@@ -37,7 +37,7 @@ for fname in os.listdir(apps_directory):
 
     class_name = '{0}Application'.format(''.join([word.capitalize() for word in  module_name.replace('_',' ').split()]))
 
-    module = import_module('.apps.{0}'.format(module_name), 'sentinel')
+    module = import_module('.apps.{0}'.format(module_name), 'astra')
 
     if not hasattr(module, class_name):
         raise Exception('Missing class "{0}" in app "{1}".'.format(class_name, module_name))
