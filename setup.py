@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(
     name='astra',
-    version='0.1a',
+    version='0.1a.dev0',
     url='https://github.com/megamandos/astra',
     description='The astra framework.',
     author='Eric Johnson',
@@ -17,5 +17,8 @@ setup(
         'astra.apps.console.commands',
         'astra.user_services',
         'astra.team_services',
+    ],
+    install_requires=[
+        'twisted'
     ]
 )

@@ -14,3 +14,6 @@ Start the client with the following commands:
 ```bash
 python3 astra console
 ```
+
+### Versioning ###
+All version numbers follow PEP-440: https://www.python.org/dev/peps/pep-0440/
