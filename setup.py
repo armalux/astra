@@ -18,7 +18,7 @@ setup(
         'astra.user_services',
         'astra.team_services',
     ],
-    install_requires=[
+    requires=[
         'twisted'
     ]
 )
