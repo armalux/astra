@@ -55,7 +55,7 @@ class Random:
         sequence = bytearray(set(sequence))
         avoid = bytes(set(avoid))
         for a in avoid:
-            if a in sequence:
+            while a in sequence:
                 sequence.pop(sequence.find(a))
         return bytes([sequence[x % len(sequence)] for x in os.urandom(length)])
 
