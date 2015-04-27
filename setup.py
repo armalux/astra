@@ -6,7 +6,7 @@ setup(
     name='astra',
     version='0.1a.dev0',
     url='https://github.com/megamandos/astra',
-    description='The astra framework.',
+    description='The Astra Exploit Framework.',
     author='Eric Johnson',
     author_email='megamandos@gmail.com',
     packages=[
