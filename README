@@ -1,0 +1,16 @@
+# Astra Exploit Framework #
+The Astra Exploit Framework (astra) is a tool for exploit development and
+penetration testing, designed for collaboration.
+
+## Team Server and Console Client ##
+The team server is a SOAP RPC server. All actual work is done on the server.
+This way, it is easier to share objects and operations between users. To that
+point, all sockets, objects, file descriptors, etc. are shared. The console
+client is a SOAP based terminal for accessing the Team Server.
+
+Note: This release is alpha, and it not even close to a real working example.
+
+Start the client with the following commands:
+```bash
+python3 astra console
+```

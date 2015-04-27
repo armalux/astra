@@ -5,6 +5,7 @@ from distutils.core import setup
 setup(
     name='astra',
     version='0.1a',
+    url='https://github.com/megamandos/astra',
     description='The astra framework.',
     author='Eric Johnson',
     author_email='megamandos@gmail.com',
