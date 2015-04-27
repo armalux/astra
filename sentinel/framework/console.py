@@ -233,13 +233,13 @@ class Console:
         return cls.stylize(text, *sgr_codes)
 
     @classmethod
-    def print_table(cls, headers, rows, indent=3):
+    def print_table(cls, headers, rows, indent=3, column_padding=2):
         ljust = [len(header) for header in headers]
         for row in rows:
             for i,column in enumerate(row):
                 ljust[i] = max(len(column), ljust[i])
 
-        ljust = [i + 1 for i in ljust]
+        ljust = [i + column_padding for i in ljust]
         left_padding = indent * ' '
         header_line = ''.join([header.ljust(ljust[i]) for i,header in enumerate(headers)])
         separator_line = ''.join([('-'*len(header)).ljust(ljust[i]) for i,header in enumerate(headers)])
