@@ -3,9 +3,11 @@ import os
 import random
 import base64
 import binascii
-from ..user_services.random import Random
-from ..user_services.munge import Munger, MungerException
-from ..framework.rpc import ValidationException, SubscribeValidator
+import json
+from ..services.random import RandomService as Random
+from ..services.munge import MungerService as Munger, MungerException
+from ..framework.router.validation import ValidationException, SubscribeValidator
+from ..framework.router.messages import SubscribedMessage
 
 __all__ = ['TestRandomGenerator', 'TestMunger', 'TestRpc']
 
@@ -99,6 +101,7 @@ class TestRandomGenerator(unittest.TestCase):
 
     def tearDown(self):
         self.random = None
+
 
 class TestMunger(unittest.TestCase):
     def setUp(self):
@@ -213,4 +216,11 @@ class TestRpc(unittest.TestCase):
         }
         with self.assertRaises(ValidationException):
             SubscribeValidator(data)
+
+    def test_message_creation(self):
+        msg = SubscribedMessage(1,999)
+        data = json.loads(str(msg))
+        self.assertTrue(data['request_id'] == 1)
+        self.assertTrue(data['msg_type'] == 'subscribed')
+        self.assertTrue(data['subscription_id'] == 999)
 

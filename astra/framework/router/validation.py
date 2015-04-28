@@ -1,5 +1,4 @@
-from tornado import websocket
-import json
+__all__ = ['ValidationException', 'SubscribeValidator', 'HelloValidator']
 
 
 class ValidationException(Exception):
@@ -23,7 +22,7 @@ def validated_property(prop_type):
     return function_generator
 
 
-class Handler:
+class Validator:
     _msg_type = None
     __properties__ = []
 
@@ -34,6 +33,7 @@ class Handler:
 
     def __new__(cls, *args, **kwargs):
         obj = super().__new__(cls)
+
         for attr_name, attr_value in cls.__dict__.items():
             if not isinstance(attr_value, property):
                 continue
@@ -44,16 +44,14 @@ class Handler:
         return obj
 
     def __init__(self, data):
+        self.msg_type = data['msg_type']
         for prop_name in self.__properties__:
             if prop_name not in data:
                 raise ValidationException('Missing {0}.'.format(prop_name))
             setattr(self, prop_name, data[prop_name])
 
-    def handle(self, ws):
-        raise NotImplementedError()
 
-
-class SubscribeHandler(Handler):
+class SubscribeValidator(Validator):
     _msg_type = 'subscribe'
 
     @validated_property(int)
@@ -70,7 +68,7 @@ class SubscribeHandler(Handler):
         pass
 
 
-class HelloHandler(ServiceUser, Handler):
+class HelloValidator(Validator):
     _msg_type = 'hello'
 
     @validated_property(str)
@@ -80,51 +78,5 @@ class HelloHandler(ServiceUser, Handler):
     @validated_property(dict)
     def details(self, value):
         pass
-
-    def handle(self, ws):
-        if self.realm not in ws._realms:
-            ws.close()
-            return
-
-        session_id = self.services.random.integer(0, 9007199254740992)
-
-
-class MessageHandler(websocket.WebSocketHandler):
-    _handlers = {
-        'hello': HelloHandler,
-        'subscribe': SubscribeHandler
-    }
-
-    _realms = {
-        'astra.realm': {
-        }
-    }
-
-    _sessions = {}
-
-    def on_message(self, message):
-        try:
-            message = json.loads(message)
-        except ValueError:
-            self.close()
-            return
-
-        if 'msg_type' not in message:
-            self.close()
-            return
-
-        if message['msg_type'] not in self._handlers:
-            self.close()
-            return
-
-        try:
-            handler = self._handlers[message['msg_type']](message)
-        except ValidationException:
-            self.close()
-            return
-
-        handler.handle(self)
-
-
 
 

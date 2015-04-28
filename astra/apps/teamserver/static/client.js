@@ -5,7 +5,7 @@ function AstraClient(url) {
 
     this.socket.onopen = function() {
         client.onopen();
-        client.hello('astra.realm');
+        client.hello('astra');
     };
 
     this.socket.onmessage = function(evt) {
@@ -17,8 +17,32 @@ function AstraClient(url) {
             case 'welcome':
                 client.session_id = data.session_id;
                 break;
+
+            case 'subscribed':
+                var request = this.pending_requests[data.request_id];
+                delete this.pending_requests[data.request_id];
+                this.subscriptions[request.topic] = data.subscription_id;
+                break;
+
+            case 'published':
+                var request = this.pending_requests[data.request_id];
+                delete this.pending_requests[data.request_id];
+                break;
+
+            case 'error':
+                var request = this.pending_requests[data.request_id];
+                delete this.pending_requests[data.request_id];
+                console.error(data);
+                break;
+
+            case 'abort':
+                alert('Session establishment failed: ' + data.details.message);
+                break;
         }
     };
+
+    this.subscriptions = {};
+    this.pending_requests = {};
 
     this.onopen = function() {};
     this.onmessage = function(data) {};
@@ -38,6 +62,7 @@ AstraClient.prototype.subscribe = function(topic) {
         'topic': topic
     };
 
+    this.pending_requests[msg['request_id']] = msg;
     this.socket.send(JSON.stringify(msg));
 };
 
