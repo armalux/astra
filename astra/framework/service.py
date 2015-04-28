@@ -132,8 +132,8 @@ class ServiceUser:
 
     @property
     def services(self):
-        if self.__class__.__service_manager is None:
-            self.__class__.__service_manager = ServiceManager()
+        if ServiceUser.__service_manager is None:
+            ServiceUser.__service_manager = ServiceManager()
             services_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'services')
             for fname in os.listdir(services_path):
                 if fname in ['__init__.py', '__pycache__', '__main__.py']:
@@ -148,20 +148,17 @@ class ServiceUser:
 
                 module = import_module('...services.{0}'.format(modname), __name__)
 
-                for attr_name, attr_value in module.__dict__.items():
-                    attr = getattr(module, attr_name)
-                    if not isinstance(attr, type):
-                        continue
+                if not hasattr(module, 'provider'):
+                    continue
 
-                    if not hasattr(attr, '__provider__'):
-                        continue
+                provider = getattr(module, 'provider')
 
-                    if not isinstance(attr.__provider__, ServiceProvider):
-                        continue
+                if not isinstance(provider, ServiceProvider):
+                    continue
 
-                    self.__class__.__service_manager.register(attr.__provider__)
+                ServiceUser.__service_manager.register(provider)
 
-        return self.__class__.__service_manager
+        return ServiceUser.__service_manager
 
     @services.setter
     def services(self, value):
