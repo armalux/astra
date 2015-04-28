@@ -7,7 +7,7 @@ class SocketException(Exception):
     pass
 
 
-class SocketService(socket.socket):
+class Socket(socket.socket):
     __promiscuous = False
     __raw = False
 
