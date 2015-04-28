@@ -2,7 +2,7 @@
 The Astra Exploit Framework (astra) is a tool for exploit development and penetration testing, designed focusing on teamwork.
 
 ## Team Server and Console Client ##
-The team server is an RPC/PubSub client using a [WAMP](https://github.com/tavendo/WAMP)-like protocol to communicate with clients. All actual work is done on the server. This way, it is easier to share objects and operations between users (such as sending the same console output to multiple people). All clients use the same WAMP-like protocol to communicate with the server. This means that a console client, and a web based client all use the same protocol, and have the same capabilities.
+The team server is an RPC/PubSub router/client combination using a [WAMP](https://github.com/tavendo/WAMP)-like protocol to communicate with other clients. All actual work (exploits thrown, files transfered, etc) is done on the server. This way, it is easier to share objects and operations between users (such as sending the same console output to multiple people). All clients use the same WAMP-like protocol to communicate with the server. This means that a console client, and a web based client all use the same protocol, and have the same capabilities.
 
 Start the server with the following command:
 ```bash
