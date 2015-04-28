@@ -3,9 +3,11 @@ import os
 import random
 import base64
 import binascii
-from ..framework import Random, Munger, MungerException
+from ..user_services.random import Random
+from ..user_services.munge import Munger, MungerException
+from ..framework.rpc import ValidationException, SubscribeValidator
 
-__all__ = ['TestRandomGenerator', 'TestMunger']
+__all__ = ['TestRandomGenerator', 'TestMunger', 'TestRpc']
 
 class TestRandomGenerator(unittest.TestCase):
     def test_system_random(self):
@@ -171,4 +173,44 @@ class TestMunger(unittest.TestCase):
         unmunged = self.munger.unmunge(munged)
         self.assertTrue(unmunged == plain_text)
 
+
+class TestRpc(unittest.TestCase):
+    def test_subscribe_validation(self):
+        data = {
+            'msg_type': 'subscribe',
+            'request_id': 192340425,
+            'options': {},
+            'topic': 'com.google.astra.chat'
+        }
+        val = SubscribeValidator(data)
+
+        for key in data:
+            self.assertTrue(getattr(val, key) == data[key])
+
+        data = {
+            'msg_type': 'subscribe',
+            'request_id': 1923404250000000000000,
+            'options': {},
+            'topic': 'com.google.astra.chat'
+        }
+        with self.assertRaises(ValidationException):
+            SubscribeValidator(data)
+
+        data = {
+            'msg_type': 'subscribes',
+            'request_id': 192340,
+            'options': {},
+            'topic': 'com.google.astra.chat'
+        }
+        with self.assertRaises(ValidationException):
+            SubscribeValidator(data)
+
+        data = {
+            'msg_type': 'subscribe',
+            'request_id': 192340,
+            'options': 44,
+            'topic': 'com.google.astra.chat'
+        }
+        with self.assertRaises(ValidationException):
+            SubscribeValidator(data)
 
