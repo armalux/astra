@@ -1,6 +1,7 @@
 import socket
 import fcntl
 import struct
+from ..framework.service import SingletonServiceProvider
 
 
 class SocketException(Exception):

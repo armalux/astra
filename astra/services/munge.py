@@ -1,11 +1,14 @@
 import os
+from ..framework.service import SingletonServiceProvider
 
 
 class MungerException(Exception):
     pass
 
 
-class Munger:
+class MungerService:
+    __provider__ = SingletonServiceProvider('munge', MungerService())
+
     '''
     Will alter a byte string to make it unreadable, but easily reversible.
     Nothing here is "cryptographically secure", but helps fight automated

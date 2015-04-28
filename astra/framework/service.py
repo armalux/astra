@@ -1,3 +1,5 @@
+import os
+from importlib import import_module
 
 
 class ServiceException(Exception):
@@ -131,6 +133,33 @@ class ServiceUser:
     def services(self):
         if self.__service_manager is None:
             self.__service_manager = ServiceManager()
+            services_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'services')
+            for fname in os.listdir(services_path):
+                if fname in ['__init__.py', '__pycache__', '__main__.py']:
+                    continue
+
+                if os.path.isdir(os.path.join(services_path, fname)):
+                    modname = fname
+                else:
+                    modname, extension = os.path.splitext(fname)
+                    if extension != '.py':
+                        continue
+
+                module = import_module('..services.{0}'.format(modname))
+
+                for attr_name, attr_value in module.__dict__.items():
+                    attr = getattr(module, attr_name)
+                    if not isinstance(attr, type):
+                        continue
+
+                    if not hasattr(attr, '__provider__'):
+                        continue
+
+                    if not isinstance(attr.__provider__, ServiceProvider):
+                        continue
+
+                    self.__service_manager.register(attr.__provider__)
+
         return self.__service_manager
 
     @services.setter
