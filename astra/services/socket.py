@@ -9,7 +9,7 @@ class SocketException(Exception):
 
 
 class SocketService(socket.socket):
-    __provider__ = SingletonServiceProvider('socket', SocketService)
+    __provider__ = None
     __promiscuous = False
     __raw = False
 
@@ -93,4 +93,4 @@ class SocketService(socket.socket):
         self._promiscuous = value
 
 
-provider = SingletonServiceProvider(Socket)
+SocketService.__provider__ = SingletonServiceProvider('socket', SocketService)

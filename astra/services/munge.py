@@ -7,8 +7,7 @@ class MungerException(Exception):
 
 
 class MungerService:
-    __provider__ = SingletonServiceProvider('munge', MungerService())
-
+    __provider__ = None
     '''
     Will alter a byte string to make it unreadable, but easily reversible.
     Nothing here is "cryptographically secure", but helps fight automated
@@ -166,4 +165,4 @@ class MungerService:
         return self.multi_byte_rotating_xor(data[4:], data[:4])
 
 
-
+MungerService.__provider__ = SingletonServiceProvider('munge', MungerService())

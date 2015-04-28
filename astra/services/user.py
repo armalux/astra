@@ -4,7 +4,6 @@ import threading
 
 
 class UserService(Singleton):
-    __provider__ = SingletonServiceProvider('user', UserService())
     _thread_storage = threading.local()
 
     @property
@@ -14,3 +13,6 @@ class UserService(Singleton):
     @property
     def connection(self):
         return self._thread_storage.connection
+
+
+UserService.__provider__ = SingletonServiceProvider('user', UserService())

@@ -6,12 +6,11 @@ from ..framework.service import SingletonServiceProvider
 
 
 class RandomService:
-    __provider__ = SingletonServiceProvider('munge', RandomService())
-
     '''
     A set of relatively fast random data algorithms.
     '''
     __system_random = None
+    __provider__ = None
 
     @property
     def system_random(self):
@@ -139,4 +138,4 @@ class RandomService:
         return binascii.b2a_base64(self.bytes(math.ceil(float(length) * (5.0/6.0))))
 
 
-
+RandomService.__provider__ = SingletonServiceProvider('random', RandomService())
