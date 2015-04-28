@@ -7,17 +7,6 @@
                 var input = jQuery('textarea[name=message]');
                 var output = jQuery('div#output');
                 var client3 = new AstraClient('ws://10.211.55.10:8080/ws');
-                client3.socket.onopen = function() {
-                    client3.subscribe('test');
-                    var client1 = new AstraClient('ws://10.211.55.10:8080/ws');
-                    client1.socket.onopen = function() {
-                        client1.subscribe('test');
-                        var client2 = new AstraClient('ws://10.211.55.10:8080/ws');
-                        client2.socket.onopen = function() {
-                            client2.publish('test', 'testing 1... 2... 3...');
-                        };
-                    };
-                };
             });
         </script>
     </head>
