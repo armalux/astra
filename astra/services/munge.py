@@ -1,3 +1,8 @@
+import os
+
+
+class MungerException(Exception):
+    pass
 
 
 class Munger:
