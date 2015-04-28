@@ -4,7 +4,6 @@ function AstraClient(url) {
     this.socket = new WebSocket(url);
 
     this.socket.onopen = function() {
-        client.onopen();
         client.hello('astra');
     };
 
@@ -16,22 +15,31 @@ function AstraClient(url) {
         switch(data.msg_type) {
             case 'welcome':
                 client.session_id = data.session_id;
+                client.onopen();
                 break;
 
             case 'subscribed':
-                var request = this.pending_requests[data.request_id];
-                delete this.pending_requests[data.request_id];
-                this.subscriptions[request.topic] = data.subscription_id;
+                var request = client.pending_requests[data.request_id];
+                delete client.pending_requests[data.request_id];
+                client.subscriptions[request.topic] = data.subscription_id;
+                break;
+
+            case 'unsubscribed':
+                var request = client.pending_requests[data.request_id];
+                delete client.pending_requests[data.request_id];
                 break;
 
             case 'published':
-                var request = this.pending_requests[data.request_id];
-                delete this.pending_requests[data.request_id];
+                var request = client.pending_requests[data.request_id];
+                delete client.pending_requests[data.request_id];
+                break;
+
+            case 'event':
                 break;
 
             case 'error':
-                var request = this.pending_requests[data.request_id];
-                delete this.pending_requests[data.request_id];
+                var request = client.pending_requests[data.request_id];
+                delete client.pending_requests[data.request_id];
                 console.error(data);
                 break;
 
@@ -42,7 +50,7 @@ function AstraClient(url) {
     };
 
     this.subscriptions = {};
-    this.pending_requests = {};
+    client.pending_requests = {};
 
     this.onopen = function() {};
     this.onmessage = function(data) {};
@@ -66,38 +74,42 @@ AstraClient.prototype.subscribe = function(topic) {
     this.socket.send(JSON.stringify(msg));
 };
 
-AstraClient.prototype.hello = function(realm) {
+AstraClient.prototype.hello = function() {
     var msg = {
-        'msg_type': 'hello',
-        'realm': realm,
-        'details': {
-            'roles': {
-                'publisher': {},
-                'subscriber': {}
-            }
-        }
+        'msg_type': 'hello'
     };
 
     this.socket.send(JSON.stringify(msg));
 };
 
-AstraClient.prototype.publish = function(channel, message) {
+AstraClient.prototype.publish = function(topic, options, args, kwargs) {
+    if(args == undefined)
+        args = [];
+
+    if(kwargs == undefined)
+        kwargs = {};
+
     var msg = {
-        'type': 'publish',
-        'channel': channel,
-        'message': message
+        'msg_type': 'publish',
+        'request_id': this.getRequestId(),
+        'options': options,
+        'topic': topic,
+        'args': args,
+        'kwargs': kwargs
     };
 
+    this.pending_requests[msg['request_id']] = msg;
     this.socket.send(JSON.stringify(msg));
 };
 
 AstraClient.prototype.call = function(func_name, args, kwargs) {
     var msg = {
-        'type': 'call',
+        'msg_type': 'call',
         'function': func_name,
         'args': args,
         'kwargs': kwargs
     };
 
+    this.pending_requests[msg['request_id']] = msg;
     this.socket.send(JSON.stringify(msg));
 };

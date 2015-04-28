@@ -19,6 +19,7 @@ setup(
         'astra.team_services',
     ],
     requires=[
-        'twisted'
+        'tornado',
+        'sqlalchemy'
     ]
 )

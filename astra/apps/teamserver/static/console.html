@@ -6,7 +6,14 @@
             jQuery(document).ready(function() {
                 var input = jQuery('textarea[name=message]');
                 var output = jQuery('div#output');
-                var client3 = new AstraClient('ws://10.211.55.10:8080/ws');
+                var client = new AstraClient('ws://10.211.55.10:8080/ws');
+                client.onopen = function() {
+                    client.subscribe('astra.server.messages');
+                    var client2 = new AstraClient('ws://10.211.55.10:8080/ws');
+                        client2.onopen = function() {
+                        client2.publish('astra.server.messages', {}, [], {'message': 'This is a test.'});
+                    };
+                };
             });
         </script>
     </head>

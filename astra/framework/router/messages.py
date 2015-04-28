@@ -1,7 +1,7 @@
 import json
 
 
-__all__ = ['SubscribedMessage', 'UnsubscribedMessage', 'AbortMessage', 'WelcomeMessage']
+__all__ = ['SubscribedMessage', 'UnsubscribedMessage', 'AbortMessage', 'WelcomeMessage', 'PublishedMessage', 'EventMessage']
 
 
 class Message:
@@ -35,6 +35,11 @@ class UnsubscribedMessage(Message):
     arguments = ['request_id']
 
 
+class PublishedMessage(Message):
+    msg_type = 'published'
+    arguments = ['request_id']
+
+
 class AbortMessage(Message):
     msg_type = 'abort'
 
@@ -47,4 +52,8 @@ class WelcomeMessage(Message):
     msg_type = 'welcome'
     arguments = ['session_id', 'details']
 
+
+class EventMessage(Message):
+    msg_type = 'event'
+    arguments = ['subscription_id', 'options', 'args', 'kwargs']
 

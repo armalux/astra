@@ -1,4 +1,4 @@
-__all__ = ['ValidationException', 'SubscribeValidator', 'HelloValidator']
+__all__ = ['ValidationException', 'SubscribeValidator', 'HelloValidator', 'PublishValidator']
 
 
 class ValidationException(Exception):
@@ -24,7 +24,7 @@ def validated_property(prop_type):
 
 class Validator:
     _msg_type = None
-    __properties__ = []
+    __properties__ = None
 
     @validated_property(str)
     def msg_type(self, value):
@@ -33,6 +33,7 @@ class Validator:
 
     def __new__(cls, *args, **kwargs):
         obj = super().__new__(cls)
+        obj.__properties__ = []
 
         for attr_name, attr_value in cls.__dict__.items():
             if not isinstance(attr_value, property):
@@ -68,15 +69,31 @@ class SubscribeValidator(Validator):
         pass
 
 
-class HelloValidator(Validator):
-    _msg_type = 'hello'
+class PublishValidator(Validator):
+    _msg_type = 'publish'
+
+    @validated_property(int)
+    def request_id(self, value):
+        if value > 9007199254740992 or value < 0:
+            raise ValidationException('Request ID out of range.')
+
+    @validated_property(dict)
+    def options(self, value):
+        pass
 
     @validated_property(str)
-    def realm(self, value):
+    def topic(self, value):
+        pass
+
+    @validated_property(list)
+    def args(self, value):
         pass
 
     @validated_property(dict)
-    def details(self, value):
+    def kwargs(self, value):
         pass
 
+
+class HelloValidator(Validator):
+    _msg_type = 'hello'
 
