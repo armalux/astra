@@ -2,9 +2,12 @@ import os
 import random
 import binascii
 import math
+from ..framework.service import SingletonServiceProvider
 
 
-class Random:
+class RandomService:
+    __provider__ = SingletonServiceProvider('munge', RandomService())
+
     '''
     A set of relatively fast random data algorithms.
     '''
