@@ -2,7 +2,7 @@ import os
 import random
 import binascii
 import math
-from ..framework.service import SingletonServiceProvider
+from ..framework.service import LazySingletonServiceProvider
 
 
 class RandomService:
@@ -138,4 +138,4 @@ class RandomService:
         return binascii.b2a_base64(self.bytes(math.ceil(float(length) * (5.0/6.0))))
 
 
-RandomService.__provider__ = SingletonServiceProvider('random', RandomService())
+RandomService.__provider__ = LazySingletonServiceProvider('random', RandomService)
