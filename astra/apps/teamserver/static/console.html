@@ -6,35 +6,53 @@
         <script>
             jQuery(document).ready(function() {
                 var input = jQuery('input[name=message]');
-                var output = jQuery('div#console');
-                var client = new AstraClient('ws://' + window.location.host + '/ws');
+                var output = jQuery('div#console-output');
+                var ws_url = 'ws://' + window.location.host + '/ws';
+                var client = new AstraClient(ws_url);
+
+                document.title = 'Astra@' + window.location.host;
+
+                function write(cls, message)
+                {
+                    var line = jQuery('<div>').addClass(cls).text(message);
+                    output.append(line);
+                    output.scrollTop(output.prop('scrollHeight'));
+                }
+
+                write('local', 'Connecting to ' + window.location.host + '...');
+
                 client.onopen = function() {
+                    write('local', 'Connected.');
                     var stdin = 'astra.clients.' + client.session_id + '.stdin';
                     var stdout = 'astra.clients.' + client.session_id + '.stdout';
                     var stderr = 'astra.clients.' + client.session_id + '.stderr';
 
                     client.onevent(stdout, function(data) {
-                        var line = jQuery('<div>').addClass('stdout').text(data.kwargs.message);
-                        output.append(line);
+                        write('stdout', data.kwargs.timestamp + ' > ' + data.kwargs.message);
                     });
 
                     client.onevent(stderr, function(data) {
-                        var line = jQuery('<div>').addClass('stderr').text(data.kwargs.message);
-                        output.append(line);
+                        write('stderr', data.kwargs.timestamp + ' > ' + data.kwargs.message);
                     });
 
-                    jQuery('button#send').on('click', function() {
-                        client.publish(stdin, {}, [input.val()]);
+                    jQuery('input[name=message]').keypress(function(event) {
+                        var keycode = (event.keyCode ? event.keyCode : event.which);
+                        if(keycode == '13')
+                        {
+                            client.publish(stdin, {}, [input.val()]);
+                            jQuery('input[name=message]').val('');
+                        }
                     });
-
-                    console.debug('Publishing to ' + stdin);
                 };
             });
         </script>
     </head>
     <body>
-        <div id="console"></div>
-        <input type="text" name="message" />
-        <button id="send">Send</button>
+        <div id="console">
+            <div id="console-output"></div>
+            <div id="console-input">
+                <input id="command" type="text" name="message" />
+            </div>
+        </div>
     </body>
 </html>
