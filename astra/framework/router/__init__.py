@@ -19,11 +19,9 @@ class MessageHandler(ServiceUser, WebSocketHandler):
             self.services.router.remove_session(self.session_id)
 
     def write_message(self, message):
-        print(message)
         super().write_message(message)
 
     def on_message(self, message):
-        print(message)
         try:
             message = json.loads(message)
         except ValueError:
@@ -50,7 +48,10 @@ class Router(Singleton, ServiceUser):
         self._websockets[peer.session_id] = ws
 
     def remove_session(self, session_id):
+        peer = self.database.query(Peer).filter(Peer.session_id == session_id).first()
+        self.database.query(Subscription).filter(Subscription.peer_id == peer.id).delete()
         self.database.query(Peer).filter(Peer.session_id == session_id).delete()
+        self.database.commit()
         del self._websockets[session_id]
 
     @property
@@ -105,10 +106,9 @@ class Router(Singleton, ServiceUser):
         msg = PublishedMessage(data.request_id)
         ws.write_message(str(msg))
 
-        subscriptions = self.database.query(Subscription).filter(Subscription.topic == data.topic)
-        for subscription in subscriptions:
+        for subscription in self.database.query(Subscription).filter(Subscription.topic == data.topic):
             msg = EventMessage(subscription.id, data.options, data.args, data.kwargs)
-            ws.write_message(str(msg))
+            self._websockets[subscription.peer.session_id].write_message(str(msg))
 
     def handle_unsubscribe(self, session, data):
         pass
