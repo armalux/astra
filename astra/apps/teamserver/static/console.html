@@ -1,11 +1,12 @@
 <html>
     <head>
+        <link rel="stylesheet" type="text/css" href="/static/console.css"></link>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
         <script src="/static/client.js"></script>
         <script>
             jQuery(document).ready(function() {
-                var input = jQuery('textarea[name=message]');
-                var output = jQuery('div#output');
+                var input = jQuery('input[name=message]');
+                var output = jQuery('div#console');
                 var client = new AstraClient('ws://10.211.55.10:8080/ws');
                 client.onopen = function() {
                     var stdin = 'astra.clients.' + client.session_id + '.stdin';
@@ -13,24 +14,27 @@
                     var stderr = 'astra.clients.' + client.session_id + '.stderr';
 
                     client.onevent(stdout, function(data) {
-                        console.log(data.kwargs.message);
+                        var line = jQuery('<div>').addClass('stdout').text(data.kwargs.message);
+                        output.append(line);
                     });
 
                     client.onevent(stderr, function(data) {
-                        console.error(data.kwargs.message);
+                        var line = jQuery('<div>').addClass('stderr').text(data.kwargs.message);
+                        output.append(line);
                     });
 
-                    console.log('Publishing to ' + stdin);
-                    client.publish(stdin, {}, ['this is a test']);
-                    client.publish(stdin, {}, []);
+                    jQuery('button#send').on('click', function() {
+                        client.publish(stdin, {}, [input.val()]);
+                    });
+
+                    console.debug('Publishing to ' + stdin);
                 };
             });
         </script>
     </head>
     <body>
-        <textarea name="message"></textarea>
+        <div id="console"></div>
+        <input type="text" name="message" />
         <button id="send">Send</button>
-        <div id="output">
-        </div>
     </body>
 </html>

@@ -1,0 +1,9 @@
+div#console
+{
+    font-family: monospace;
+}
+
+div#console > div.stderr
+{
+    color: red;
+}
