@@ -11,7 +11,6 @@ function AstraClient(url) {
         client.onmessage(evt.data);
 
         var data = JSON.parse(evt.data);
-        console.log(data);
         switch(data.msg_type) {
             case 'welcome':
                 client.session_id = data.session_id;
@@ -21,7 +20,7 @@ function AstraClient(url) {
             case 'subscribed':
                 var request = client.pending_requests[data.request_id];
                 delete client.pending_requests[data.request_id];
-                client.subscriptions[request.topic] = data.subscription_id;
+                client.subscriptions[data.subscription_id] = request.topic
                 break;
 
             case 'unsubscribed':
@@ -35,6 +34,15 @@ function AstraClient(url) {
                 break;
 
             case 'event':
+                var topic = client.subscriptions[data.subscription_id];
+                if(client.event_handlers[topic] == undefined)
+                    break;
+
+                for(var i=0 ; i < client.event_handlers[topic].length ; i++)
+                {
+                    client.event_handlers[topic][i](data);
+                }
+
                 break;
 
             case 'error':
@@ -56,13 +64,40 @@ function AstraClient(url) {
     this.onmessage = function(data) {};
 
     this.next_request_id = 0;
+
+    this.event_handlers = {};
 }
+
+AstraClient.prototype.onevent = function(topic, callback) {
+    if(this.event_handlers[topic] == undefined)
+        this.event_handlers[topic] = [];
+
+    this.event_handlers[topic].push(callback);
+
+    var subscribed = false;
+    for(var key in this.subscriptions)
+    {
+        if(this.subscriptions[key] == topic)
+            subscribed = true;
+    }
+
+    if(!subscribed)
+    {
+        this.subscribe(topic);
+    }
+};
 
 AstraClient.prototype.getRequestId = function() {
     return this.next_request_id++;
 };
 
 AstraClient.prototype.subscribe = function(topic) {
+    for(var key in this.subscriptions)
+    {
+        if(this.subscriptions[key] == topic)
+            return;
+    }
+
     var msg = {
         'msg_type': 'subscribe',
         'request_id': this.getRequestId(),

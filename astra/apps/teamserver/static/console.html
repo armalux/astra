@@ -8,9 +8,11 @@
                 var output = jQuery('div#output');
                 var client = new AstraClient('ws://10.211.55.10:8080/ws');
                 client.onopen = function() {
-                    client.subscribe('astra.server.messages');
+                    client.onevent('astra.server.messages', function(data) {
+                        console.log(data.kwargs.message);
+                    });
                     var client2 = new AstraClient('ws://10.211.55.10:8080/ws');
-                        client2.onopen = function() {
+                    client2.onopen = function() {
                         client2.publish('astra.server.messages', {}, [], {'message': 'This is a test.'});
                     };
                 };
