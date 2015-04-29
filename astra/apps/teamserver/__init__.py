@@ -1,5 +1,6 @@
 from ...framework.application import Application
 from ...framework.router import MessageHandler
+from ...framework.service import SingletonServiceProvider
 from tornado import web, ioloop, httpserver
 import os
 
@@ -24,7 +25,11 @@ class TeamserverApplication(Application):
         ], debug=self.debug)
 
         server = httpserver.HTTPServer(app)
+        self.services.register(SingletonServiceProvider('teamserver', server))
         server.listen(self.port, self.address)
+
+        # Load the components when the IOLoop starts.
+        ioloop.IOLoop.instance().add_callback(self.services.router.load_components)
         try:
             ioloop.IOLoop.instance().start()
         except KeyboardInterrupt:

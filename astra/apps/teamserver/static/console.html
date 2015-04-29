@@ -8,13 +8,21 @@
                 var output = jQuery('div#output');
                 var client = new AstraClient('ws://10.211.55.10:8080/ws');
                 client.onopen = function() {
-                    client.onevent('astra.server.messages', function(data) {
+                    var stdin = 'astra.clients.' + client.session_id + '.stdin';
+                    var stdout = 'astra.clients.' + client.session_id + '.stdout';
+                    var stderr = 'astra.clients.' + client.session_id + '.stderr';
+
+                    client.onevent(stdout, function(data) {
                         console.log(data.kwargs.message);
                     });
-                    var client2 = new AstraClient('ws://10.211.55.10:8080/ws');
-                    client2.onopen = function() {
-                        client2.publish('astra.server.messages', {}, [], {'message': 'This is a test.'});
-                    };
+
+                    client.onevent(stderr, function(data) {
+                        console.error(data.kwargs.message);
+                    });
+
+                    console.log('Publishing to ' + stdin);
+                    client.publish(stdin, {}, ['this is a test']);
+                    client.publish(stdin, {}, []);
                 };
             });
         </script>

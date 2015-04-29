@@ -1,7 +1,8 @@
 import json
 
 
-__all__ = ['SubscribedMessage', 'UnsubscribedMessage', 'AbortMessage', 'WelcomeMessage', 'PublishedMessage', 'EventMessage']
+__all__ = ['SubscribedMessage', 'UnsubscribedMessage', 'AbortMessage', 'WelcomeMessage',
+           'PublishedMessage', 'EventMessage', 'HelloMessage', 'SubscribeMessage', 'PublishMessage']
 
 
 class Message:
@@ -22,7 +23,25 @@ class Message:
             self.properties[self.arguments[i]] = args[i]
 
     def __str__(self):
-        return json.dumps(self._properties)
+        return json.dumps(self.properties)
+
+    def __getattr__(self, key):
+        if key in ['properties', 'msg_type', 'arguments', '_properties']:
+            return object.__getattribute__(self, key)
+        elif key in self.properties:
+            return self.properties[key]
+        else:
+            raise AttributeError(key)
+
+
+class HelloMessage(Message):
+    msg_type = 'hello'
+    arguments = []
+
+
+class SubscribeMessage(Message):
+    msg_type = 'subscribe'
+    arguments = ['request_id', 'options', 'topic']
 
 
 class SubscribedMessage(Message):
@@ -34,6 +53,10 @@ class UnsubscribedMessage(Message):
     msg_type = 'unsubscribed'
     arguments = ['request_id']
 
+
+class PublishMessage(Message):
+    msg_type = 'publish'
+    arguments = ['request_id', 'topic', 'options', 'args', 'kwargs']
 
 class PublishedMessage(Message):
     msg_type = 'published'
