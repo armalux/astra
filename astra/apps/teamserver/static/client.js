@@ -24,16 +24,6 @@ function AstraClient(url) {
                 client.onopen();
                 break;
 
-            case 'subscribed':
-                client.subscriptions.push(request.topic);
-                break;
-
-            case 'unsubscribed':
-                break;
-
-            case 'published':
-                break;
-
             case 'event':
                 if(client.event_handlers[data.topic] == undefined)
                     break;
@@ -45,18 +35,54 @@ function AstraClient(url) {
 
                 break;
 
-            case 'error':
-                console.error(data);
+            case 'invoke':
+                if(client.registrations[data.procedure] == undefined)
+                {
+                    var msg = {
+                        'type': 'exceptions',
+                        'invoke_id': data.invoke_id,
+                        'message': 'No such procedure.'
+                    };
+
+                    client.socket.send(JSON.stringify(msg));
+                    break;
+                }
+
+                var result = client.registrations[data.procedure](args, kwargs);
+                if(result == undefined)
+                    result = {};
+
+                var msg = {
+                    'type': 'yield',
+                    'invoke_id': data.invoke_id,
+                    'result': result
+                };
+
+                client.socket.send(JSON.stringify(msg));
                 break;
 
-            case 'abort':
-                alert('Session establishment failed: ' + data.details.message);
+            case 'result':
+                if(client.pending_calls[data.request_id] == undefined)
+                    break;
+
+                client.pending_calls[data.request_id](data.result);
+                break;
+
+            case 'error':
+                console.error('Request FAILED: ' + JSON.stringify(request));
+                break;
+
+            case 'success':
+                console.debug('Request successful: ' + JSON.stringify(request));
                 break;
         }
     };
 
     this.subscriptions = [];
-    client.pending_requests = {};
+    this.registrations = {};
+
+    this.pending_requests = {};
+    this.pending_calls = {};
 
     this.onopen = function() {};
     this.onmessage = function(data) {};
@@ -108,7 +134,7 @@ AstraClient.prototype.hello = function() {
     this.socket.send(JSON.stringify(msg));
 };
 
-AstraClient.prototype.publish = function(topic, options, args, kwargs) {
+AstraClient.prototype.publish = function(topic, args, kwargs) {
     if(args == undefined)
         args = [];
 
@@ -127,14 +153,31 @@ AstraClient.prototype.publish = function(topic, options, args, kwargs) {
     this.socket.send(JSON.stringify(msg));
 };
 
-AstraClient.prototype.call = function(func_name, args, kwargs) {
+AstraClient.prototype.register = function(func_name, callback) {
+    if(this.registrations[func_name] != undefined)
+        return false;
+
+    var msg = {
+        'type': 'register',
+        'request_id': this.getRequestId(),
+        'procedure': func_name,
+    };
+
+    this.pending_requests[msg['request_id']] = msg;
+    this.registrations[func_name] = callback;
+    this.socket.send(JSON.stringify(msg));
+};
+
+AstraClient.prototype.call = function(func_name, args, kwargs, callback) {
     var msg = {
         'type': 'call',
+        'request_id': this.getRequestId(),
         'procedure': func_name,
         'args': args,
         'kwargs': kwargs
     };
 
+    this.pending_calls[msg['request_id']] = callback;
     this.pending_requests[msg['request_id']] = msg;
     this.socket.send(JSON.stringify(msg));
 };

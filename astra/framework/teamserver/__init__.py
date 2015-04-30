@@ -175,28 +175,24 @@ class ConsoleComponent(Component):
         self.register('astra.teamserver.commands.run', self.on_command)
 
     def on_command(self, cmd):
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
         if not len(cmd):
             return
 
         try:
-            parts = shlex.split(line, posix=True)
+            parts = shlex.split(cmd, posix=True)
         except ValueError as e:
-            timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             return { 'pipe': 'stderr', 'message': str(e), 'timestamp': timestamp }
 
         if not len(parts):
             return
 
         if parts[0] not in self.commands:
-            timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             return { 'pipe': 'stderr', 'message': 'No such command "{0}"'.format(parts[0]), 'timestamp': timestamp }
 
         return {'pipe': 'stdout', 'message': 'Running command...', 'timestamp': timestamp }
 
-    def on_client_connect(self, session_id):
-        stdin = 'astra.clients.{session_id}.stdin'.format(session_id = session_id)
-        stdout = 'astra.clients.{session_id}.stdout'.format(session_id = session_id)
-        stderr = 'astra.clients.{session_id}.stderr'.format(session_id = session_id)
 
 class TeamServerHandler(WebSocketHandler):
     _invocations = {}
@@ -206,10 +202,7 @@ class TeamServerHandler(WebSocketHandler):
     _components = None
     _messages = None
     session_id = None
-    _next_invoke_id = len(range(0, 9007199254740992))
-
-    def open(self):
-        print(self.request.remote_ip)
+    _next_invoke_id = iter(range(0, 9007199254740992))
 
     @property
     def new_session_id(self):
@@ -286,7 +279,7 @@ class TeamServerHandler(WebSocketHandler):
                 subs.remove(self.session_id)
 
         procedures_to_delete = []
-        for procedure, session_id in self.procedures:
+        for procedure, session_id in self.procedures.items():
             if self.session_id == session_id:
                 procedures_to_delete.append(procedure)
 
@@ -294,7 +287,7 @@ class TeamServerHandler(WebSocketHandler):
             del self.procedures[procedure]
 
         invocations_to_delete = []
-        for invoke_id, details in self.invocations:
+        for invoke_id, details in self.invocations.items():
             if self.session_id == details['session_id']:
                 invocations_to_delete.append(invoke_id)
 
@@ -306,24 +299,20 @@ class TeamServerHandler(WebSocketHandler):
         try:
             msg = json.loads(msg)
         except ValueError:
-            print('bad msg format')
             self.close()
             return
 
         if 'type' not in msg or msg['type'] not in self.messages:
-            print('msg missing type')
             self.close()
             return
 
         msg = self.messages[msg['type']].from_dict(msg)
 
         if msg.type != 'hello' and self.session_id is None:
-            print('no hello')
             self.close()
             return
 
         if msg.type == 'hello' and self.session_id is not None:
-            print('bad hello')
             self.close()
             return
 
@@ -363,7 +352,7 @@ class TeamServerHandler(WebSocketHandler):
 
             if self.request.remote_ip != '127.0.0.1':
                 for comp in self.components:
-                    if comp.on_client_unsubscribe(session_id, msg.topic) is False:
+                    if comp.on_client_unsubscribe(self.session_id, msg.topic) is False:
                         return
 
             self.subscriptions[msg.topic].remove(self.session_id)
@@ -392,7 +381,7 @@ class TeamServerHandler(WebSocketHandler):
 
             if self.request.remote_ip != '127.0.0.1':
                 for comp in self.components:
-                    if comp.on_client_call(session_id, msg.procedure, *msg.args, **msg.kwargs) is False:
+                    if comp.on_client_call(self.session_id, msg.procedure, *msg.args, **msg.kwargs) is False:
                         return
 
             invoke_id = self.next_invoke_id
@@ -406,7 +395,7 @@ class TeamServerHandler(WebSocketHandler):
 
             if self.request.remote_ip != '127.0.0.1':
                 for comp in self.components:
-                    if comp.on_client_register(session_id, msg.procedure) is False:
+                    if comp.on_client_register(self.session_id, msg.procedure) is False:
                         return
 
             self.procedures[msg.procedure] = self.session_id
@@ -421,7 +410,7 @@ class TeamServerHandler(WebSocketHandler):
 
             if self.request.remote_ip != '127.0.0.1':
                 for comp in self.components:
-                    if comp.on_client_unregister(session_id, msg.procedure) is False:
+                    if comp.on_client_unregister(self.session_id, msg.procedure) is False:
                         return
 
             del self.procedures[msg.procedure]

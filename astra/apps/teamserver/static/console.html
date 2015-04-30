@@ -23,23 +23,14 @@
 
                 client.onopen = function() {
                     write('local', 'Connected.');
-                    var stdin = 'astra.clients.' + client.session_id + '.stdin';
-                    var stdout = 'astra.clients.' + client.session_id + '.stdout';
-                    var stderr = 'astra.clients.' + client.session_id + '.stderr';
-
-                    client.subscribe(stdout, function(data) {
-                        write('stdout', data.kwargs.timestamp + ' > ' + data.kwargs.message);
-                    });
-
-                    client.subscribe(stderr, function(data) {
-                        write('stderr', data.kwargs.timestamp + ' > ' + data.kwargs.message);
-                    });
 
                     jQuery('input[name=message]').keypress(function(event) {
                         var keycode = (event.keyCode ? event.keyCode : event.which);
                         if(keycode == '13')
                         {
-                            client.publish(stdin, {}, [input.val()]);
+                            client.call('astra.teamserver.commands.run', [input.val()], {}, function(result) {
+                                write(result.pipe, result.timestamp + ' > ' + result.message);
+                            });
                             write('stdout', input.val());
                             jQuery('input[name=message]').val('');
                         }
