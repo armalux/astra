@@ -1,2 +1,2 @@
-__all__ = ['application', 'client', 'console', 'munge', 'proc',
+__all__ = ['application', 'client', 'munge', 'proc',
            'random', 'service', 'singleton', 'socket', 'teamserver']
