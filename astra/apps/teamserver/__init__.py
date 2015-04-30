@@ -1,5 +1,5 @@
 from ...framework.application import Application
-from ...framework.teamserver import TeamServerHandler
+from ...framework.teamserver.handler import TeamServerHandler
 from ...framework.service import SingletonServiceProvider
 from tornado import web, ioloop, httpserver, gen
 import os
