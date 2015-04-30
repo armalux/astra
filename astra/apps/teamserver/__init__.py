@@ -1,7 +1,7 @@
 from ...framework.application import Application
 from ...framework.teamserver import TeamServerHandler
 from ...framework.service import SingletonServiceProvider
-from tornado import web, ioloop, httpserver
+from tornado import web, ioloop, httpserver, gen
 import os
 
 
@@ -28,6 +28,12 @@ class TeamserverApplication(Application):
         self.services.register(SingletonServiceProvider('teamserver', server))
         server.listen(self.port, self.address)
 
+        @gen.coroutine
+        def display_running_message():
+            print('Running.')
+
+        ioloop.IOLoop.instance().add_callback(display_running_message)
+        print('Starting Astra Team Server on {0}:{1}...'.format(self.address, self.port))
         try:
             ioloop.IOLoop.instance().start()
         except KeyboardInterrupt:
