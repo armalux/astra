@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from distutils.core import setup
+from setuptools import setup
 import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
@@ -8,6 +8,11 @@ import astra
 
 setup(
     name='astra',
+    entry_points={
+        'console_scripts': [
+            'astra = astra:main'
+        ]
+    },
     version=astra.__version__,
     url='https://github.com/megamandos/astra',
     description='The Astra Exploit Framework',
@@ -16,7 +21,7 @@ setup(
     packages=[
         'astra',
         'astra.framework',
-        'astra.framework.router',
+        'astra.framework.teamserver',
         'astra.apps',
         'astra.apps.teamserver',
         'astra.apps.console',
@@ -30,7 +35,6 @@ setup(
         'astra.apps.teamserver': ['static/*']
     },
     requires=[
-        'tornado',
-        'sqlalchemy'
+        'tornado'
     ]
 )
