@@ -4,50 +4,48 @@ function AstraClient(url) {
     this.socket = new WebSocket(url);
 
     this.socket.onopen = function() {
-        client.hello('astra');
+        client.hello();
     };
 
     this.socket.onmessage = function(evt) {
         client.onmessage(evt.data);
 
         var data = JSON.parse(evt.data);
-        switch(data.msg_type) {
+
+        if(data.request_id != undefined)
+        {
+            var request = client.pending_requests[data.request_id];
+            delete client.pending_requests[data.request_id];
+        }
+
+        switch(data.type) {
             case 'welcome':
                 client.session_id = data.session_id;
                 client.onopen();
                 break;
 
             case 'subscribed':
-                var request = client.pending_requests[data.request_id];
-                delete client.pending_requests[data.request_id];
-                client.subscriptions[data.subscription_id] = request.topic
+                client.subscriptions.push(request.topic);
                 break;
 
             case 'unsubscribed':
-                var request = client.pending_requests[data.request_id];
-                delete client.pending_requests[data.request_id];
                 break;
 
             case 'published':
-                var request = client.pending_requests[data.request_id];
-                delete client.pending_requests[data.request_id];
                 break;
 
             case 'event':
-                var topic = client.subscriptions[data.subscription_id];
-                if(client.event_handlers[topic] == undefined)
+                if(client.event_handlers[data.topic] == undefined)
                     break;
 
-                for(var i=0 ; i < client.event_handlers[topic].length ; i++)
+                for(var i=0 ; i < client.event_handlers[data.topic].length ; i++)
                 {
-                    client.event_handlers[topic][i](data);
+                    client.event_handlers[data.topic][i](data);
                 }
 
                 break;
 
             case 'error':
-                var request = client.pending_requests[data.request_id];
-                delete client.pending_requests[data.request_id];
                 console.error(data);
                 break;
 
@@ -57,7 +55,7 @@ function AstraClient(url) {
         }
     };
 
-    this.subscriptions = {};
+    this.subscriptions = [];
     client.pending_requests = {};
 
     this.onopen = function() {};
@@ -68,40 +66,33 @@ function AstraClient(url) {
     this.event_handlers = {};
 }
 
-AstraClient.prototype.onevent = function(topic, callback) {
+AstraClient.prototype.getRequestId = function() {
+    return this.next_request_id++;
+};
+
+AstraClient.prototype.subscribed = function(topic) {
+    for( var i=0 ; i < this.subscriptions.length ; i++ )
+    {
+        if(this.subscriptions[i] == topic)
+            return true;
+    }
+
+    return false;
+};
+
+AstraClient.prototype.subscribe = function(topic, callback) {
+
     if(this.event_handlers[topic] == undefined)
         this.event_handlers[topic] = [];
 
     this.event_handlers[topic].push(callback);
 
-    var subscribed = false;
-    for(var key in this.subscriptions)
-    {
-        if(this.subscriptions[key] == topic)
-            subscribed = true;
-    }
-
-    if(!subscribed)
-    {
-        this.subscribe(topic);
-    }
-};
-
-AstraClient.prototype.getRequestId = function() {
-    return this.next_request_id++;
-};
-
-AstraClient.prototype.subscribe = function(topic) {
-    for(var key in this.subscriptions)
-    {
-        if(this.subscriptions[key] == topic)
-            return;
-    }
+    if(this.subscribed(topic))
+        return;
 
     var msg = {
-        'msg_type': 'subscribe',
+        'type': 'subscribe',
         'request_id': this.getRequestId(),
-        'options': {},
         'topic': topic
     };
 
@@ -111,7 +102,7 @@ AstraClient.prototype.subscribe = function(topic) {
 
 AstraClient.prototype.hello = function() {
     var msg = {
-        'msg_type': 'hello'
+        'type': 'hello'
     };
 
     this.socket.send(JSON.stringify(msg));
@@ -125,9 +116,8 @@ AstraClient.prototype.publish = function(topic, options, args, kwargs) {
         kwargs = {};
 
     var msg = {
-        'msg_type': 'publish',
+        'type': 'publish',
         'request_id': this.getRequestId(),
-        'options': options,
         'topic': topic,
         'args': args,
         'kwargs': kwargs
@@ -139,8 +129,8 @@ AstraClient.prototype.publish = function(topic, options, args, kwargs) {
 
 AstraClient.prototype.call = function(func_name, args, kwargs) {
     var msg = {
-        'msg_type': 'call',
-        'function': func_name,
+        'type': 'call',
+        'procedure': func_name,
         'args': args,
         'kwargs': kwargs
     };

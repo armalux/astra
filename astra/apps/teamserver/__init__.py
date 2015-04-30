@@ -1,5 +1,5 @@
 from ...framework.application import Application
-from ...framework.router import MessageHandler
+from ...framework.teamserver import TeamServerHandler
 from ...framework.service import SingletonServiceProvider
 from tornado import web, ioloop, httpserver
 import os
@@ -19,7 +19,7 @@ class TeamserverApplication(Application):
         static_path = os.path.join(os.path.dirname(__file__), 'static')
 
         app = web.Application([
-            ('/ws', MessageHandler),
+            ('/ws', TeamServerHandler),
             ('/(console.html)', web.StaticFileHandler, { 'path': static_path }),
             ('/static/(.*)', web.StaticFileHandler, { 'path': static_path })
         ], debug=self.debug)
@@ -28,8 +28,8 @@ class TeamserverApplication(Application):
         self.services.register(SingletonServiceProvider('teamserver', server))
         server.listen(self.port, self.address)
 
-        # Load the components when the IOLoop starts.
-        ioloop.IOLoop.instance().add_callback(self.services.router.load_components)
+        TeamServerHandler.load_components()
+
         try:
             ioloop.IOLoop.instance().start()
         except KeyboardInterrupt:

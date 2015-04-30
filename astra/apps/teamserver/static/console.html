@@ -27,11 +27,11 @@
                     var stdout = 'astra.clients.' + client.session_id + '.stdout';
                     var stderr = 'astra.clients.' + client.session_id + '.stderr';
 
-                    client.onevent(stdout, function(data) {
+                    client.subscribe(stdout, function(data) {
                         write('stdout', data.kwargs.timestamp + ' > ' + data.kwargs.message);
                     });
 
-                    client.onevent(stderr, function(data) {
+                    client.subscribe(stderr, function(data) {
                         write('stderr', data.kwargs.timestamp + ' > ' + data.kwargs.message);
                     });
 
@@ -40,6 +40,7 @@
                         if(keycode == '13')
                         {
                             client.publish(stdin, {}, [input.val()]);
+                            write('stdout', input.val());
                             jQuery('input[name=message]').val('');
                         }
                     });
