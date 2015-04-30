@@ -28,8 +28,6 @@ class TeamserverApplication(Application):
         self.services.register(SingletonServiceProvider('teamserver', server))
         server.listen(self.port, self.address)
 
-        TeamServerHandler.load_components()
-
         try:
             ioloop.IOLoop.instance().start()
         except KeyboardInterrupt:

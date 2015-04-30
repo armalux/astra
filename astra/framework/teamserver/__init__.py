@@ -51,15 +51,11 @@ class TeamServerHandler(WebSocketHandler):
     @property
     def components(self):
         if self.__class__._components is None:
-            self.__class__.load_components()
+            self.__class__._components = []
+            for comp in load_components():
+                self.__class__._components.append(comp('ws://{0}/ws'.format(self.request.host)))
 
         return self.__class__._components
-
-    @classmethod
-    def load_components(cls):
-        cls._components = []
-        for comp in load_components():
-            cls._components.append(comp('ws://127.0.0.1:8080/ws'))
 
     def on_close(self):
         if self.session_id is None:
