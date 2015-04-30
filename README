@@ -9,7 +9,7 @@ Install using pip for python 3 (`pip3 install astra`). Then run the following co
 astra teamserver
 ```
 
-You can view the optionally (for development) you may simply clone this repository, and from the root of the clone, run the following command:
+Optionally (for development) you may simply clone this repository, then from the root of the clone run the following command:
 ```
 python3 astra teamserver
 ```
