@@ -1,9 +1,10 @@
 from tornado import gen
 from tornado.ioloop import IOLoop
 from tornado.websocket import websocket_connect
+import json
+from threading import Event
 from .teamserver.messages import *
 from .teamserver.messages import load as load_messages
-import json
 
 
 class AstraClient:
@@ -119,5 +120,17 @@ class AstraClient:
 
     def _on_open(self):
         self._ws.write_message(HelloMessage())
+
+    def blocking_call(self, procedure, *args, **kwargs):
+        result = None
+        event = Event()
+
+        def callback(details):
+            result = details
+            event.set()
+
+        self.call(callback, procedure, *args, **kwargs)
+        event.wait()
+        return result
 
 
