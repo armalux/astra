@@ -1,40 +1,77 @@
-from ..framework.router import Component
 from importlib import import_module
+from ..framework.service import ServiceUser
+from ..framework.client import AstraClient
 import os
 import inspect
 import sys
 
 
 __all__ = []
-components = []
+_components = None
 
 
-this_path = os.path.dirname(os.path.realpath(__file__))
-for fname in os.listdir(this_path):
-    if fname in ['__pycache__', '__init__.py', '__main__.py']:
-        continue
+def load():
+    global _components
+    if _components is not None:
+        return
 
-    if os.path.isdir(os.path.join(this_path, fname)):
-        modname = fname
-    else:
-        modname, extension = os.path.splitext(fname)
-        if extension != '.py':
+    _components = []
+    this_path = os.path.dirname(os.path.realpath(__file__))
+    for fname in os.listdir(this_path):
+        if fname in ['__pycache__', '__init__.py', '__main__.py']:
             continue
 
-    module = import_module('.{0}'.format(modname), __name__)
-    for attr in module.__dict__.values():
-        if not isinstance(attr, type):
-            continue
+        if os.path.isdir(os.path.join(this_path, fname)):
+            modname = fname
+        else:
+            modname, extension = os.path.splitext(fname)
+            if extension != '.py':
+                continue
 
-        if attr is Component:
-            continue
+        module = import_module('.{0}'.format(modname), __name__)
+        for attr in module.__dict__.values():
+            if not isinstance(attr, type):
+                continue
 
-        if Component not in attr.__bases__:
-            continue
+            if attr is Component:
+                continue
 
-        __all__.append(attr.__name__)
-        components.append(attr)
-        setattr(sys.modules[__name__], attr.__name__, attr)
+            if Component not in attr.__bases__:
+                continue
 
+            __all__.append(attr.__name__)
+            _components.append(attr)
+            setattr(sys.modules[__name__], attr.__name__, attr)
+
+    return _components
+
+
+class Component(AstraClient, ServiceUser):
+    def init(self):
+        pass
+
+    def on_client_connect(self, session_id):
+        pass
+
+    def on_client_disconnect(self, session_id):
+        pass
+
+    def on_client_subscribe(self, session_id, topic):
+        pass
+
+    def on_client_unsubscribe(self, session_id, topic):
+        pass
+
+    def on_client_register(self, session_id, procedure):
+        pass
+
+    def on_client_unregister(self, session_id, procedure):
+        pass
+
+    def on_client_call(self, session_id, procedure, *args, **kwargs):
+        pass
+
+    def on_client_publish(self, session_id, topic, *args, **kwargs):
+        pass
 
 

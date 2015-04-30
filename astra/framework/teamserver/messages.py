@@ -1,6 +1,35 @@
 import json
 import inspect
 import re
+import sys
+
+
+_messages = None
+__all__ = ['HelloMessage', 'WelcomeMessage', 'AbortMessage', 'ErrorMessage',
+           'SuccessMessage', 'PublishMessage', 'SubscribeMessage', 'UnsubscribeMessage',
+           'RegisterMessage', 'UnregisterMessage', 'EventMessage', 'CallMessage',
+           'InvokeMessage', 'YieldMessage', 'ExceptionMessage', 'ResultMessage']
+
+
+def load():
+    global _messages
+    if _messages is not None:
+        return _messages
+
+    _messages = {}
+    for name, value in inspect.getmembers(sys.modules[__name__]):
+        if not isinstance(value, type):
+            continue
+
+        if not issubclass(value, Message):
+            continue
+
+        if value is Message:
+            continue
+
+        _messages[value.type] = value
+
+    return _messages
 
 
 class ValidatedProperty:
@@ -116,11 +145,6 @@ class Message(metaclass=MessageMeta):
 
 class HelloMessage(Message):
     _args = []
-
-    def handle(self, ws):
-        session_id = ws.new_session_id
-        ws.sessions[session_id] = ws
-        ws.write_message(WelcomeMessage(session_id))
 
 
 class WelcomeMessage(Message):
