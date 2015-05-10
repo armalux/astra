@@ -56,7 +56,7 @@ def main():
         exit(0)
 
     app_class = applications[arguments.application]
-    for argument,value in arguments.__dict__.items():
+    for argument, value in arguments.__dict__.items():
         setattr(app_class, argument, value)
 
     app_class().run()
