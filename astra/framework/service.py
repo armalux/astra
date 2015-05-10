@@ -1,6 +1,5 @@
 import os
 from importlib import import_module
-from .. import services
 
 
 class ServiceException(Exception):
