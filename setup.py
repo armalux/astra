@@ -31,7 +31,7 @@ setup(
         'astra.components.console',
         'astra.test',
     ],
-    package_data = {
+    package_data={
         'astra.apps.teamserver': ['static/*']
     },
     requires=[
