@@ -1,8 +1,8 @@
 from importlib import import_module
-from ..framework.service import ServiceUser
-from ..framework.client import AstraClient
 import os
 import sys
+from ..framework.service import ServiceUser
+from ..framework.teamserver.client import AstraClient
 
 
 __all__ = []
