@@ -20,8 +20,8 @@ class TeamserverApplication(Application):
 
         app = web.Application([
             ('/ws', TeamServerHandler),
-            ('/(console.html)', web.StaticFileHandler, { 'path': static_path }),
-            ('/static/(.*)', web.StaticFileHandler, { 'path': static_path })
+            ('/(console.html)', web.StaticFileHandler, {'path': static_path}),
+            ('/static/(.*)', web.StaticFileHandler, {'path': static_path})
         ], debug=self.debug)
 
         server = httpserver.HTTPServer(app)
