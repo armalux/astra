@@ -64,6 +64,10 @@ class LazyServiceProvider(ServiceProvider):
     def service_class(self):
         return self.__service_class
 
+    @property
+    def instance(self):
+        return self.__service_class(*self.__args, **self.__kwargs)
+
 
 class LazySingletonServiceProvider(LazyServiceProvider):
     __instance = None
