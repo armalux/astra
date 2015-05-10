@@ -15,7 +15,7 @@ def main():
 
     # Get our argument parser.
     parser = ArgumentParser()
-    parser.add_argument('-v','--version', action='version', version='%(prog)s ' + sys.modules[__name__].__version__)
+    parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + sys.modules[__name__].__version__)
     subparsers = parser.add_subparsers()
 
     # Get ready to load the application help data.
@@ -32,7 +32,9 @@ def main():
         else:
             module_name = fname
 
-        class_name = '{0}Application'.format(''.join([word.capitalize() for word in  module_name.replace('_',' ').split()]))
+        class_name = '{0}Application'.format(''.join(
+            [word.capitalize() for word in module_name.replace('_', ' ').split()]
+        ))
 
         module = import_module('.apps.{0}'.format(module_name), 'astra')
 
@@ -42,7 +44,7 @@ def main():
         app_class = getattr(module, class_name)
 
         subparser = subparsers.add_parser(module_name, help=app_class.__doc__)
-        subparser.description = app_class.help.__doc__ if app_class.help.__doc__ != None else app_class.__doc__
+        subparser.description = app_class.help.__doc__ if app_class.help.__doc__ is not None else app_class.__doc__
         app_class.help(subparser)
         subparser.set_defaults(application=module_name)
 
