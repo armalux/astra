@@ -88,6 +88,6 @@ class Socket(socket.socket):
         else:
             self.ioctl(socket.SIO_RCVALL, socket.RCVALL_OFF)
 
-        self._promiscuous = value
+        self.__promiscuous = value
 
 
