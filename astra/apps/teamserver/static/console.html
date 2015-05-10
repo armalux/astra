@@ -1,50 +1,19 @@
 <html>
     <head>
-        <link rel="stylesheet" type="text/css" href="/static/console.css"></link>
+        <link rel="stylesheet" type="text/css" href="/static/console.css" />
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
         <script src="/static/client.js"></script>
         <script>
             jQuery(document).ready(function() {
-                var input = jQuery('input[name=message]');
-                var output = jQuery('div#console-output');
                 var ws_url = 'ws://' + window.location.host + '/ws';
                 var client = new AstraClient(ws_url);
 
                 document.title = 'Astra@' + window.location.host;
 
-                function write(cls, message)
-                {
-                    var line = jQuery('<div>').addClass(cls).text(message);
-                    output.append(line);
-                    output.scrollTop(output.prop('scrollHeight'));
-                }
-
-                write('local', 'Connecting to ' + window.location.host + '...');
-
-                client.onopen = function() {
-                    write('local', 'Connected.');
-
-                    jQuery('input[name=message]').keypress(function(event) {
-                        var keycode = (event.keyCode ? event.keyCode : event.which);
-                        if(keycode == '13')
-                        {
-                            client.call('astra.teamserver.commands.run', [input.val()], {}, function(result) {
-                                write(result.pipe, result.timestamp + ' > ' + result.message);
-                            });
-                            write('stdout', input.val());
-                            jQuery('input[name=message]').val('');
-                        }
-                    });
-                };
+                client.onopen = function() {};
             });
         </script>
     </head>
     <body>
-        <div id="console">
-            <div id="console-output"></div>
-            <div id="console-input">
-                <input id="command" type="text" name="message" />
-            </div>
-        </div>
     </body>
 </html>
