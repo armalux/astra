@@ -88,6 +88,7 @@ class LazyFactoryServiceProvider(LazyServiceProvider):
 class ServiceManager:
     def __init__(self, parent=None):
         self.__providers = {}
+        self.__parent = None
         self.parent = parent
 
     @property
