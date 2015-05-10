@@ -14,10 +14,10 @@ setup(
         ]
     },
     version=astra.__version__,
-    url='https://github.com/megamandos/astra',
+    url='https://github.com/armalux/astra',
     description='The Astra Exploit Framework',
     author='Eric Johnson',
-    author_email='megamandos@gmail.com',
+    author_email='eric.johnson@armalux.io',
     packages=[
         'astra',
         'astra.framework',
