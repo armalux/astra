@@ -3,13 +3,12 @@ import os
 import random
 import base64
 import binascii
-import json
-from ..services.random import RandomService as Random
-from ..services.munge import MungerService as Munger, MungerException
-from ..framework.router.validation import ValidationException, SubscribeValidator
-from ..framework.router.messages import SubscribedMessage
+from ..framework.random import Random as Random
+from ..framework.munge import Munger, MungerException
 
-__all__ = ['TestRandomGenerator', 'TestMunger', 'TestRpc']
+
+__all__ = ['TestRandomGenerator', 'TestMunger']
+
 
 class TestRandomGenerator(unittest.TestCase):
     def test_system_random(self):
@@ -32,17 +31,17 @@ class TestRandomGenerator(unittest.TestCase):
         self.assertTrue(len(data) == 0)
 
     def test_integer(self):
-        minimum, maximum = 0,100
+        minimum, maximum = 0, 100
         i = self.random.integer(minimum, maximum)
-        self.assertTrue(i >= minimum and i <= maximum)
+        self.assertTrue(minimum <= i <= maximum)
 
-        minimum, maximum = 0,100
+        minimum, maximum = 0, 100
         i = self.random.integer(maximum)
-        self.assertTrue(i >= minimum and i <= maximum)
+        self.assertTrue(minimum <= i <= maximum)
 
-        minimum, maximum = 0,2**32
+        minimum, maximum = 0, 2**32
         i = self.random.integer()
-        self.assertTrue(i >= minimum and i <= maximum)
+        self.assertTrue(minimum <= i <= maximum)
 
     def test_sample_length(self):
         for expected_length in range(1, 1000):
@@ -63,15 +62,15 @@ class TestRandomGenerator(unittest.TestCase):
                 self.assertFalse(a in data)
 
     def test_printable_length(self):
-        for expected_length in range(1,1000):
+        for expected_length in range(1, 1000):
             data = self.random.printable(expected_length)
             self.assertTrue(len(data) == expected_length)
             for d in data:
-                self.assertTrue(d < 127 and d > 31)
+                self.assertTrue(31 < d < 127)
 
     def test_printable_avoid(self):
-        for expected_length in range(1,1000):
-            avoid_bytes = bytes(random.sample(range(32,127), 10))
+        for expected_length in range(1, 1000):
+            avoid_bytes = bytes(random.sample(range(32, 127), 10))
             data = self.random.printable(expected_length, avoid=avoid_bytes)
             for b in avoid_bytes:
                 self.assertFalse(b in data)
@@ -81,7 +80,7 @@ class TestRandomGenerator(unittest.TestCase):
         self.assertTrue(len(data) == 0)
 
     def test_base64_decodable(self):
-        for length in range(0,1000):
+        for length in range(0, 1000):
             data = self.random.base64(length, decodable=True)
             self.assertTrue(len(data) >= length)
             try:
@@ -91,7 +90,7 @@ class TestRandomGenerator(unittest.TestCase):
                 raise
 
     def test_hex_decodable(self):
-        for length in range(0,1000):
+        for length in range(0, 1000):
             data = self.random.hex(length, decodable=True)
             self.assertTrue(len(data) >= length)
             binascii.unhexlify(data)
@@ -175,52 +174,3 @@ class TestMunger(unittest.TestCase):
 
         unmunged = self.munger.unmunge(munged)
         self.assertTrue(unmunged == plain_text)
-
-
-class TestRpc(unittest.TestCase):
-    def test_subscribe_validation(self):
-        data = {
-            'msg_type': 'subscribe',
-            'request_id': 192340425,
-            'options': {},
-            'topic': 'com.google.astra.chat'
-        }
-        val = SubscribeValidator(data)
-
-        for key in data:
-            self.assertTrue(getattr(val, key) == data[key])
-
-        data = {
-            'msg_type': 'subscribe',
-            'request_id': 1923404250000000000000,
-            'options': {},
-            'topic': 'com.google.astra.chat'
-        }
-        with self.assertRaises(ValidationException):
-            SubscribeValidator(data)
-
-        data = {
-            'msg_type': 'subscribes',
-            'request_id': 192340,
-            'options': {},
-            'topic': 'com.google.astra.chat'
-        }
-        with self.assertRaises(ValidationException):
-            SubscribeValidator(data)
-
-        data = {
-            'msg_type': 'subscribe',
-            'request_id': 192340,
-            'options': 44,
-            'topic': 'com.google.astra.chat'
-        }
-        with self.assertRaises(ValidationException):
-            SubscribeValidator(data)
-
-    def test_message_creation(self):
-        msg = SubscribedMessage(1,999)
-        data = json.loads(str(msg))
-        self.assertTrue(data['request_id'] == 1)
-        self.assertTrue(data['msg_type'] == 'subscribed')
-        self.assertTrue(data['subscription_id'] == 999)
-
