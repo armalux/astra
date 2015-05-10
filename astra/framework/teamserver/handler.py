@@ -1,4 +1,4 @@
-from tornado.websocket import WebSocketHandler, websocket_connect
+from tornado.websocket import WebSocketHandler
 import json
 import random
 from ...components import load as load_components
@@ -18,7 +18,7 @@ class TeamServerHandler(WebSocketHandler):
     @property
     def new_session_id(self):
         while True:
-            session_id = random.SystemRandom().randint(0,9007199254740992)
+            session_id = random.SystemRandom().randint(0, 9007199254740992)
             if session_id not in self.sessions:
                 break
 
@@ -86,7 +86,6 @@ class TeamServerHandler(WebSocketHandler):
 
         for invocation in invocations_to_delete:
             del self.invocations[invocation]
-
 
     def on_message(self, msg):
         try:
