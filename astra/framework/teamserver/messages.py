@@ -89,7 +89,7 @@ class MessageMeta(type):
             return type.__new__(meta, name, bases, dct)
 
         if '_args' not in dct:
-            raise ValueError('Class {0} is missing attribute {1}.'.format(name, attr))
+            raise ValueError('Class {0} is missing attribute {1}.'.format(name, '_args'))
 
         properties = ['type']
         for key, value in dct.items():
@@ -112,7 +112,8 @@ class MessageMeta(type):
 
 
 class Message(metaclass=MessageMeta):
-    _args = None
+    _args = []
+    _properties = []
 
     def __init__(self, *values):
         if len(values) != len(self._args):
