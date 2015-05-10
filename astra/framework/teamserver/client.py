@@ -3,8 +3,7 @@ from tornado.ioloop import IOLoop
 from tornado.websocket import websocket_connect
 import json
 from threading import Event
-from .teamserver.messages import *
-from .teamserver.messages import load as load_messages
+from . import messages
 
 
 class AstraClient:
@@ -29,7 +28,7 @@ class AstraClient:
 
     @property
     def messages(self):
-        return load_messages()
+        return messages.load()
 
     def _on_message(self, msg):
         if msg is None:
@@ -60,7 +59,7 @@ class AstraClient:
             if result is None:
                 result = {}
 
-            self._ws.write_message(YieldMessage(msg.invoke_id, result))
+            self._ws.write_message(messages.YieldMessage(msg.invoke_id, result))
 
         elif msg.type == 'event':
             if msg.topic not in self._subscriptions:
@@ -84,7 +83,7 @@ class AstraClient:
     def subscribe(self, topic, callback):
         if topic not in self._subscriptions:
             self._subscriptions[topic] = []
-            msg = SubscribeMessage.instance(self.next_request_id, topic)
+            msg = messages.SubscribeMessage.instance(self.next_request_id, topic)
             self._pending_requests[msg.request_id] = msg
             self._ws.write_message(str(msg))
 
@@ -95,17 +94,17 @@ class AstraClient:
             raise ValueError('Procedure "{0}" is already registered.'.format(procedure))
 
         self._procedures[procedure] = callback
-        msg = RegisterMessage.instance(self.next_request_id, procedure)
+        msg = messages.RegisterMessage.instance(self.next_request_id, procedure)
         self._pending_requests[msg.request_id] = msg
         self._ws.write_message(str(msg))
 
     def publish(self, topic, *args, **kwargs):
-        msg = PublishMessage.instance(self.next_request_id, topic, list(args), kwargs)
+        msg = messages.PublishMessage.instance(self.next_request_id, topic, list(args), kwargs)
         self._pending_requests[msg.request_id] = msg
         self._ws.write_message(str(msg))
 
     def call(self, callback, procedure, *args, **kwargs):
-        msg = CallMessage.instance(self.next_request_id, procedure, list(args), kwargs)
+        msg = messages.CallMessage.instance(self.next_request_id, procedure, list(args), kwargs)
         self._pending_requests[msg.request_id] = msg
         self._pending_calls[msg.request_id] = callback
         self._ws.write_message(str(msg))
@@ -119,7 +118,7 @@ class AstraClient:
         self._next_request_id = iter(range(0, 9007199254740992))
 
     def _on_open(self):
-        self._ws.write_message(HelloMessage())
+        self._ws.write_message(messages.HelloMessage())
 
     def blocking_call(self, procedure, *args, **kwargs):
         result = None
