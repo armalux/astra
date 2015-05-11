@@ -24,11 +24,8 @@ setup(
         'astra.framework.teamserver',
         'astra.apps',
         'astra.apps.teamserver',
-        'astra.apps.console',
-        'astra.apps.console.commands',
         'astra.services',
         'astra.components',
-        'astra.components.console',
         'astra.test',
     ],
     package_data={
