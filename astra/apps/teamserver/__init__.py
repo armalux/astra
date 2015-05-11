@@ -1,5 +1,6 @@
 from ...framework.application import Application
 from ...framework.teamserver.handler import TeamServerHandler
+from ...framework.teamserver.server import TeamServer
 from ...framework.service import SingletonServiceProvider
 from ...framework.proc import Callback
 from tornado import web, ioloop, httpserver, gen
@@ -73,12 +74,19 @@ class TeamserverApplication(Application):
         loop.start()
 
     def run(self):
-        self.start_web_server()
+        self.services.load()
+        # self.start_web_server()
+        ts = TeamServer()
+        ts.start()
 
         try:
             while True:
                 time.sleep(10)
         except KeyboardInterrupt:
+            print('Caught interrupt, exiting...')
+
+        finally:
             self.stop_web_server()
+            ts.stop()
 
         print('Goodbye.')

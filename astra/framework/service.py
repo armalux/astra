@@ -130,6 +130,32 @@ class ServiceManager:
         assert isinstance(provider, ServiceProvider)
         self.__setitem__(provider.name, provider)
 
+    def load(self):
+        services_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'services')
+        for fname in os.listdir(services_path):
+            if fname in ['__init__.py', '__pycache__', '__main__.py']:
+                continue
+
+            if os.path.isdir(os.path.join(services_path, fname)):
+                modname = fname
+
+            else:
+                modname, extension = os.path.splitext(fname)
+                if extension != '.py':
+                    continue
+
+            module = import_module('...services.{0}'.format(modname), __name__)
+
+            if not hasattr(module, 'provider'):
+                continue
+
+            provider = getattr(module, 'provider')
+
+            if not isinstance(provider, ServiceProvider):
+                continue
+
+            self.register(provider)
+
 
 class ServiceUser:
     __service_manager = None
@@ -138,29 +164,6 @@ class ServiceUser:
     def services(self):
         if ServiceUser.__service_manager is None:
             ServiceUser.__service_manager = ServiceManager()
-            services_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'services')
-            for fname in os.listdir(services_path):
-                if fname in ['__init__.py', '__pycache__', '__main__.py']:
-                    continue
-
-                if os.path.isdir(os.path.join(services_path, fname)):
-                    modname = fname
-                else:
-                    modname, extension = os.path.splitext(fname)
-                    if extension != '.py':
-                        continue
-
-                module = import_module('...services.{0}'.format(modname), __name__)
-
-                if not hasattr(module, 'provider'):
-                    continue
-
-                provider = getattr(module, 'provider')
-
-                if not isinstance(provider, ServiceProvider):
-                    continue
-
-                ServiceUser.__service_manager.register(provider)
 
         return ServiceUser.__service_manager
 
