@@ -36,18 +36,6 @@ class ClientHandler(ServiceUser):
 
         return buffer
 
-    def print(self, msg):
-        self.write(msg + '\n')
-
-    def write(self, data):
-        data = data.encode('utf-8')
-        self.send_message(b'\x00' + data)
-
-    def prompt(self, msg):
-        msg = msg.encode('utf-8')
-        self.send_message(b'\x01' + msg)
-        return self.recv_message().decode('utf-8')
-
     def send_message(self, data):
         self._conn.send(struct.pack('<H', len(data)))
         self._conn.sendall(data)
@@ -62,7 +50,7 @@ class ClientHandler(ServiceUser):
 
         try:
             while True:
-                line = self.prompt(self.console.red('astra') + ' > ')
+                line = self.console.prompt(self.console.red('astra') + ' > ')
                 self.console.run(line)
                 if line.strip() == 'exit':
                     self.send_message(b'\x02')

@@ -100,7 +100,7 @@ class Console:
     def run(self, line):
         try:
             parts = shlex.split(line, posix=True)
-        except ValueError as e:
+        except ValueError:
             return
 
         if not parts:
@@ -125,7 +125,18 @@ class Console:
         self.commands[parts[0]](self, options).run()
 
     def print(self, msg):
-        self.client.print(msg)
+        if not isinstance(msg, str):
+            msg = repr(msg)
+        self.write(msg + '\n')
+
+    def write(self, data):
+        data = data.encode('utf-8')
+        self.client.send_message(b'\x00' + data)
+
+    def prompt(self, msg):
+        msg = msg.encode('utf-8')
+        self.client.send_message(b'\x01' + msg)
+        return self.client.recv_message().decode('utf-8')
 
     @staticmethod
     def get_csi_sequence(*sgr_codes):
