@@ -36,14 +36,23 @@ class Client:
         while True:
             try:
                 msg = self.recv_message()
-            except OSError:
+
+            except (OSError, KeyboardInterrupt, EOFError, BrokenPipeError):
                 break
 
             if msg[0] == 0:
                 sys.stdout.write(msg[1:].decode('utf-8'))
 
             elif msg[0] == 1:
-                self.send_message(input(msg[1:].decode('utf-8')).encode('utf-8'))
+                try:
+                    response = input(msg[1:].decode('utf-8'))
+
+                except (KeyboardInterrupt, EOFError):
+                    self.send_message(b'exit')
+                    print('\nGoodbye!')
+                    break
+
+                self.send_message(response.encode('utf-8'))
 
             elif msg[0] == 2:
                 break
@@ -56,7 +65,7 @@ class ConsoleApplication(Application):
         Launch an instance of the astra console.
         """
         parser.add_argument('host', help='Host to connect to in the form [hostname|ip]:[port]',
-                            default='127.0.0.1:1337')
+                            default='127.0.0.1:65322')
 
     def run(self):
         self.services.load()

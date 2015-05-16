@@ -4,6 +4,7 @@ from code import InteractiveConsole
 from types import ModuleType
 import sys
 import inspect
+import astra
 
 
 class PassThroughModule(ModuleType):
@@ -53,7 +54,7 @@ class PythonCommand(ConsoleCommand):
     @classmethod
     def help(cls, parser):
         """
-        Reload modules.
+        Launch a python console.
         """
 
     def run(self):
@@ -61,6 +62,7 @@ class PythonCommand(ConsoleCommand):
                  "__doc__": None,
                  'sys': FakeSys(sys, self.console),
                  'print': self.console.print,
-                 'input': self.console.prompt}
+                 'input': self.console.prompt,
+                 'astra': astra}
         console = PythonConsole(self.console, local)
         console.interact()

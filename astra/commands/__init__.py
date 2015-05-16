@@ -5,6 +5,7 @@ import re
 import argparse
 import shlex
 import io
+import traceback
 import readline
 from ..framework.service import ServiceUser
 
@@ -44,6 +45,18 @@ def load():
     return commands
 
 
+class HelpAction(argparse.Action, ServiceUser):
+    def __call__(self, parser, namespace, values, option_string=None):
+        help_message = io.StringIO('')
+        parser.print_help(file=help_message)
+        self.services.session.console.print(help_message.getvalue())
+        raise HelpActionAbort()
+
+
+class HelpActionAbort(Exception):
+    pass
+
+
 class ConsoleCommandMeta(type):
     _name = None
     _parser = None
@@ -65,7 +78,8 @@ class ConsoleCommandMeta(type):
     @property
     def parser(cls):
         if cls._parser is None:
-            cls._parser = argparse.ArgumentParser(prog=cls.name, description=cls.description)
+            cls._parser = argparse.ArgumentParser(prog=cls.name, description=cls.description, add_help=False)
+            cls._parser.add_argument('-h', '--help', action=HelpAction, nargs=0)
             cls.help(cls._parser)
         return cls._parser
 
@@ -84,18 +98,20 @@ class ConsoleCommand(ServiceUser, metaclass=ConsoleCommandMeta):
 
 
 class Console:
+    _commands = {}
+
     def __init__(self, client):
         self.client = client
-        self._commands = {}
 
     @property
     def commands(self):
-        if not self._commands:
-            self._commands = load()
-        return self._commands
+        if not self.__class__._commands:
+            self.__class__._commands = load()
+        return self.__class__._commands
 
-    def reload_commands(self):
-        self._commands = load()
+    @classmethod
+    def reload_commands(cls):
+        cls._commands = load()
 
     def run(self, line):
         try:
@@ -113,10 +129,12 @@ class Console:
         try:
             options = self.commands[parts[0]].parser.parse_args(parts[1:])
 
+        except HelpActionAbort:
+            return
+
         except SystemExit:
-            help_message = io.StringIO('')
-            self.commands[parts[0]].parser.print_help(file=help_message)
-            self.print(help_message.getvalue())
+            self.print('Bad syntax, try "{0} -h".'.format(parts[0]))
+            self.print(self.commands[parts[0]].parser.format_usage().strip())
             return
 
         except argparse.ArgumentError:
@@ -137,6 +155,17 @@ class Console:
         msg = msg.encode('utf-8')
         self.client.send_message(b'\x01' + msg)
         return self.client.recv_message().decode('utf-8')
+
+    def print_traceback(self, exception):
+        assert isinstance(exception, Exception)
+
+        traceback_list = traceback.extract_tb(exception.__traceback__)
+        del traceback_list[:1]
+        lines = traceback.format_list(traceback_list)
+        if lines:
+            lines.insert(0, "Traceback (most recent call last):\n")
+        lines.extend(traceback.format_exception_only(exception.__class__, exception))
+        self.print(''.join(lines))
 
     @staticmethod
     def get_csi_sequence(*sgr_codes):

@@ -8,7 +8,7 @@ class HelpCommand(ConsoleCommand):
     @staticmethod
     def help(parser):
         """
-        Display this message and return.
+        Display a list of commands and return.
         """
 
     def run(self):

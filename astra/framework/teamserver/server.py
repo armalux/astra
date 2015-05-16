@@ -4,6 +4,7 @@ from ..proc import Callback
 from ...commands import Console
 import socket
 import struct
+import atexit
 
 
 class ClientHandler(ServiceUser):
@@ -14,6 +15,7 @@ class ClientHandler(ServiceUser):
         self.remote_address, self.remote_port = address
         self._thread = Callback(self._handle).spawn(start=False, stop=conn.close)
         self.console = Console(self)
+        self._closed = False
 
     def start(self):
         self._thread.start()
@@ -46,15 +48,23 @@ class ClientHandler(ServiceUser):
         return data
 
     def _handle(self):
-        print('connection open')
+        self.services.session.connection = self
+        self.services.session.console = self.console
+        self.services.session.server = self._server
 
+        self.console.print('\n' + self._server.motd + '\n')
         try:
             while True:
-                line = self.console.prompt(self.console.red('astra') + ' > ')
-                self.console.run(line)
+                line = self.console.prompt(self.console.cyan('astra') + ' > ')
                 if line.strip() == 'exit':
                     self.send_message(b'\x02')
                     break
+
+                try:
+                    self.console.run(line)
+
+                except Exception as e:
+                    self.console.print_traceback(e)
 
         except OSError:
             pass
@@ -68,14 +78,12 @@ class ClientHandler(ServiceUser):
 
             del self._server.clients[self.id]
 
-        print('connection closed')
-
 
 class TeamServer(ServiceUser):
     def __init__(self, address='0.0.0.0', port=65322, motd='Welcome to Astra Team Server', handler_class=None):
         if handler_class is None:
             self._handler_class = ClientHandler
-        self._motd = motd
+        self.motd = motd
         self._socket = self.services.socket()
         self._thread = Callback(self._run, address, port).spawn(start=False, stop=self._socket.close)
         self._next_client_id = iter(range(0, 2**64))
@@ -94,13 +102,16 @@ class TeamServer(ServiceUser):
             client.stop()
 
     def _run(self, address, port):
+        self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self._socket.bind((address, int(port)))
         self._socket.listen(5)
+
+        atexit.register(self._socket.close)
 
         while True:
             try:
                 conn, address = self._socket.accept()
-            except ConnectionAbortedError as e:
+            except ConnectionAbortedError:
                 return
 
             client = ClientHandler(self, conn, address, self.next_client_id)
