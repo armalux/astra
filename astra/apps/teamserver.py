@@ -1,5 +1,5 @@
 import time
-from ...framework.application import Application
+from ..framework.application import Application
 from astra.framework.server import TeamServer
 
 
