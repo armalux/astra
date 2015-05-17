@@ -86,7 +86,8 @@ class ModuleLoader:
     def load(cls, path):
         path = os.path.realpath(path)
         assert os.path.isfile(path)
-        return cls.load_module(open(path).read(), path)
+        with open(path) as f:
+            return cls.load_module(f.read(), path)
 
     @staticmethod
     def find_components(dct):
