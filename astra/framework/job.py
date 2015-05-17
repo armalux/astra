@@ -11,9 +11,10 @@ class JobManager:
 
     @property
     def next_id(self):
-        with self._next_id as next_id:
+        try:
+            return self._next_id
+        finally:
             self._next_id += 1
-            return next_id
 
     def _complete_job(self, job_id):
         if job_id not in self._jobs:
