@@ -6,9 +6,11 @@ import binascii
 from ..framework.random import Random
 from ..framework.munge import Munger, MungerException
 from ..framework.service import ServiceManager
+from ..framework.job import JobManager
+from ..framework.proc import Callback
 
 
-__all__ = ['TestRandomGenerator', 'TestMunger', 'TestServer']
+__all__ = ['TestRandomGenerator', 'TestMunger', 'TestServer', 'TestJobManager']
 
 
 class TestRandomGenerator(unittest.TestCase):
@@ -182,3 +184,36 @@ class TestServer(unittest.TestCase):
         services = ServiceManager()
         services.load()
         services.module.load()
+
+
+class TestJobManager(unittest.TestCase):
+    def setUp(self):
+        self.manager = JobManager()
+
+    def test_create_job_without_callback(self):
+        def factorial(to):
+            x = 1
+            for i in range(1,to):
+                x *= i
+            return to
+
+        job = self.manager.create(Callback(factorial, 100))
+        job.wait()
+
+        self.assertTrue(job.result == 100)
+
+    def test_create_job_with_callback(self):
+        def count(to):
+            x = 1
+            for i in range(1, to):
+                x *= i
+            return x
+
+        def cb(job):
+            self.assertTrue(job.result == 933262154439441526816992388562667004907159682643816214685929638952175999932299156089414639761565182862536979208272237582511852109168640000000000000000000000)
+
+        job = self.manager.create(Callback(count, 100), cb)
+        job.wait()
+
+    def tearDown(self):
+        self.manager = None
