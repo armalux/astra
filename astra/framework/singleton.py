@@ -15,13 +15,13 @@ class Singleton(metaclass=SingletonMeta):
 
 
 class ThreadSingletonMeta(type):
-    _thread_local_singleton = None
+    _thread_local_storage = None
 
     def __call__(cls, *args, **kwargs):
-        if cls._thread_local_singleton is None:
-            cls._thread_local_singleton = threading.local()
+        if cls._thread_local_storage is None:
+            cls._thread_local_storage = threading.local()
 
-        if not hasattr(cls._thread_local_singleton, 'instance'):
-            cls._thread_local_singleton.instance = super(ThreadSingletonMeta, cls).__call__(*args, **kwargs)
+        if not hasattr(cls._thread_local_storage, 'instance'):
+            cls._thread_local_storage.instance = super(ThreadSingletonMeta, cls).__call__(*args, **kwargs)
 
-        return cls._thread_local_singleton.instance
+        return cls._thread_local_storage.instance
