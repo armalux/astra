@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-
-from setuptools import setup
+from setuptools import setup, find_packages
 import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
@@ -18,20 +17,5 @@ setup(
     description='The Astra Exploit Framework',
     author='Eric Johnson',
     author_email='eric.johnson@armalux.io',
-    packages=[
-        'astra',
-        'astra.framework',
-        'astra.framework.teamserver',
-        'astra.apps',
-        'astra.apps.teamserver',
-        'astra.services',
-        'astra.components',
-        'astra.test',
-    ],
-    package_data={
-        'astra.apps.teamserver': ['static/*']
-    },
-    requires=[
-        'tornado'
-    ]
+    packages=find_packages()
 )
