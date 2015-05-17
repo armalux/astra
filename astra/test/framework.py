@@ -3,11 +3,12 @@ import os
 import random
 import base64
 import binascii
-from ..framework.random import Random as Random
+from ..framework.random import Random
 from ..framework.munge import Munger, MungerException
+from ..framework.service import ServiceManager
 
 
-__all__ = ['TestRandomGenerator', 'TestMunger']
+__all__ = ['TestRandomGenerator', 'TestMunger', 'TestServer']
 
 
 class TestRandomGenerator(unittest.TestCase):
@@ -174,3 +175,10 @@ class TestMunger(unittest.TestCase):
 
         unmunged = self.munger.unmunge(munged)
         self.assertTrue(unmunged == plain_text)
+
+
+class TestServer(unittest.TestCase):
+    def test_load(self):
+        services = ServiceManager()
+        services.load()
+        services.module.load()
