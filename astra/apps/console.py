@@ -2,6 +2,7 @@ __author__ = 'Eric Johnson'
 from ..framework.application import Application
 import sys
 import struct
+from ..framework.console import Console
 
 
 class Client:
@@ -71,6 +72,16 @@ class ConsoleApplication(Application):
         self.services.load()
         address, port = self.host.split(':')
         sock = self.services.socket()
-        sock.connect((address, int(port)))
+
+        try:
+            sock.connect((address, int(port)))
+
+        except ConnectionRefusedError:
+            print('Connection refused.')
+            return
+
+        except ConnectionResetError:
+            print('Connection reset.')
+            return
 
         Client(sock).start()
