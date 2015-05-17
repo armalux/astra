@@ -2,7 +2,6 @@ __author__ = 'Eric Johnson'
 from ..framework.application import Application
 import sys
 import struct
-from ..framework.console import Console
 
 
 class Client:
