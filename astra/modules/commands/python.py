@@ -1,5 +1,9 @@
-__author__ = 'Eric Johnson'
-from . import ConsoleCommand
+author = 'Eric Johnson'
+uri = 'io.armalux.astra.modules.commands.python'
+name = 'Astra python console'
+description = 'Adds the python console command'
+
+from astra.framework.module import CommandComponent
 from code import InteractiveConsole
 from types import ModuleType
 import sys
@@ -50,7 +54,7 @@ class PythonConsole(InteractiveConsole):
         self.console.write(data)
 
 
-class PythonCommand(ConsoleCommand):
+class PythonCommand(CommandComponent):
     @classmethod
     def help(cls, parser):
         """

@@ -1,7 +1,7 @@
 __author__ = 'Eric Johnson'
 from ..service import ServiceUser
 from ..proc import Callback
-from ...commands import Console
+from ..console import Console
 import socket
 import struct
 import atexit

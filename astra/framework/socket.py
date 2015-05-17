@@ -1,6 +1,7 @@
 import socket
 import fcntl
 import struct
+import re
 
 
 class SocketException(Exception):

@@ -1,9 +1,14 @@
-__author__ = 'Eric Johnson'
-from . import ConsoleCommand
+author = 'Eric Johnson'
+uri = 'io.armalux.astra.modules.commands.random'
+name = 'Astra console random.'
+description = 'Adds the random command to the console.'
+
+
+from astra.framework.module import CommandComponent
 import binascii
 
 
-class RandomCommand(ConsoleCommand):
+class RandomCommand(CommandComponent):
     @classmethod
     def help(cls, parser):
         """

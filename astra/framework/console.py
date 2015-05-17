@@ -1,6 +1,4 @@
 __author__ = 'Eric Johnson'
-from importlib import import_module
-import os
 import re
 import argparse
 import shlex
@@ -8,41 +6,6 @@ import io
 import traceback
 import readline
 from ..framework.service import ServiceUser
-
-
-__all__ = []
-
-
-def load():
-    commands = {}
-    this_path = os.path.dirname(os.path.realpath(__file__))
-    for fname in os.listdir(this_path):
-        if fname in ['__pycache__', '__init__.py', '__main__.py']:
-            continue
-
-        if os.path.isdir(os.path.join(this_path, fname)):
-            modname = fname
-
-        else:
-            modname, extension = os.path.splitext(fname)
-            if extension != '.py':
-                continue
-
-        module = import_module('.{0}'.format(modname), __name__)
-
-        for attr in module.__dict__.values():
-            if not isinstance(attr, type):
-                continue
-
-            if not issubclass(attr, ConsoleCommand):
-                continue
-
-            if attr is ConsoleCommand:
-                continue
-
-            commands[attr.name] = attr
-
-    return commands
 
 
 class HelpAction(argparse.Action, ServiceUser):
@@ -87,7 +50,7 @@ class ConsoleCommandMeta(type):
         raise NotImplementedError()
 
 
-class ConsoleCommand(ServiceUser, metaclass=ConsoleCommandMeta):
+class ConsoleCommand(metaclass=ConsoleCommandMeta):
     def __init__(self, console, options):
         self.console = console
         for opt_name, opt_value in options.__dict__.items():
@@ -97,21 +60,13 @@ class ConsoleCommand(ServiceUser, metaclass=ConsoleCommandMeta):
         raise NotImplementedError()
 
 
-class Console:
-    _commands = {}
-
+class Console(ServiceUser):
     def __init__(self, client):
         self.client = client
 
     @property
     def commands(self):
-        if not self.__class__._commands:
-            self.__class__._commands = load()
-        return self.__class__._commands
-
-    @classmethod
-    def reload_commands(cls):
-        cls._commands = load()
+        return self.services.module.components['command']
 
     def run(self, line):
         try:
