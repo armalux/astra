@@ -80,7 +80,7 @@ class ClientHandler(ServiceUser):
 
 
 class TeamServer(ServiceUser):
-    def __init__(self, address='0.0.0.0', port=65322, motd='Welcome to Astra Team Server', handler_class=None):
+    def __init__(self, address='127.0.0.1', port=65322, motd='Welcome to Astra Team Server', handler_class=None):
         if handler_class is None:
             self._handler_class = ClientHandler
         self.motd = motd
