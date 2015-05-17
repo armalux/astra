@@ -1,7 +1,7 @@
 __author__ = 'Eric Johnson'
-from ..service import ServiceUser
-from ..proc import Callback
-from ..console import Console
+from astra.framework.service import ServiceUser
+from astra.framework.proc import Callback
+from astra.framework.console import Console
 import socket
 import struct
 import atexit

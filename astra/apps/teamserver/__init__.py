@@ -1,6 +1,7 @@
-from ...framework.application import Application
-from ...framework.teamserver.server import TeamServer
 import time
+
+from ...framework.application import Application
+from astra.framework.server import TeamServer
 
 
 class TeamserverApplication(Application):
