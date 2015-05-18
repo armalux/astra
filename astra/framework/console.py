@@ -2,22 +2,48 @@ __author__ = 'Eric Johnson'
 import re
 import argparse
 import shlex
-import io
 import traceback
 import readline
 from ..framework.service import ServiceUser
 
 
-class HelpAction(argparse.Action, ServiceUser):
-    def __call__(self, parser, namespace, values, option_string=None):
-        help_message = io.StringIO('')
-        parser.print_help(file=help_message)
-        self.services.session.console.print(help_message.getvalue())
-        raise HelpActionAbort()
+class ParserExit(Exception):
+    def __init__(self, code, message):
+        super().__init__(message)
+        self.code = code
 
 
-class HelpActionAbort(Exception):
-    pass
+class ArgumentParser(argparse.ArgumentParser, ServiceUser):
+    """
+    An argument parser that works with the console, instead
+    of printing to stdout and stderr.
+    """
+    def _print_message(self, message, file=None):
+        self.services.session.console.write(message)
+
+    def print_usage(self, file=None):
+        super(ArgumentParser, self).print_usage(self.services.session.console)
+
+    def print_help(self, file=None):
+        super(ArgumentParser, self).print_help(self.services.session.console)
+
+    def error(self, message):
+        """error(message: string)
+
+        Prints a usage message incorporating the message to the console and
+        exits.
+
+        If you override this in a subclass, it should not return -- it
+        should either exit or raise an exception.
+        """
+        self.print_usage()
+        args = {'prog': self.prog, 'message': message}
+        self.exit(2, '%(prog)s: error: %(message)s\n' % args)
+
+    def exit(self, status=0, message=None):
+        if message is not None:
+            self.services.session.console.print(message)
+        raise ParserExit(status, message)
 
 
 class ConsoleCommandMeta(type):
@@ -41,8 +67,7 @@ class ConsoleCommandMeta(type):
     @property
     def parser(cls):
         if cls._parser is None:
-            cls._parser = argparse.ArgumentParser(prog=cls.name, description=cls.description, add_help=False)
-            cls._parser.add_argument('-h', '--help', action=HelpAction, nargs=0)
+            cls._parser = ArgumentParser(prog=cls.name, description=cls.description)
             cls.help(cls._parser)
         return cls._parser
 
@@ -84,12 +109,10 @@ class Console(ServiceUser):
         try:
             options = self.commands[parts[0]].parser.parse_args(parts[1:])
 
-        except HelpActionAbort:
+        except ParserExit:
             return
 
         except SystemExit:
-            self.print('Bad syntax, try "{0} -h".'.format(parts[0]))
-            self.print(self.commands[parts[0]].parser.format_usage().strip())
             return
 
         except argparse.ArgumentError:
