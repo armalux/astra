@@ -59,13 +59,15 @@ class Client:
 
 
 class ConsoleApplication(Application):
+    host = None
+
     @staticmethod
     def help(parser):
         """
         Launch an instance of the astra console.
         """
-        parser.add_argument('host', help='Host to connect to in the form [hostname|ip]:[port]',
-                            default='127.0.0.1:65322')
+        parser.add_argument('--host', help='Host to connect to in the form [hostname|ip]:[port]',
+                            default='127.0.0.1:65322', action='store')
 
     def run(self):
         self.services.load()
@@ -75,12 +77,8 @@ class ConsoleApplication(Application):
         try:
             sock.connect((address, int(port)))
 
-        except ConnectionRefusedError:
-            print('Connection refused.')
-            return
-
-        except ConnectionResetError:
-            print('Connection reset.')
+        except ConnectionError:
+            print('Connection failed.')
             return
 
         Client(sock).start()

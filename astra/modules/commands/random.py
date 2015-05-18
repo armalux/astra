@@ -9,6 +9,8 @@ import binascii
 
 
 class RandomCommand(CommandComponent):
+    length = None
+
     @classmethod
     def help(cls, parser):
         """

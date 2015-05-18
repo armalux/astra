@@ -8,9 +8,9 @@ import atexit
 
 
 class ClientHandler(ServiceUser):
-    def __init__(self, server, conn, address, id):
+    def __init__(self, server, conn, address, client_id):
         self._conn = conn
-        self.id = id
+        self.id = client_id
         self._server = server
         self.remote_address, self.remote_port = address
         self._thread = Callback(self._handle).spawn(start=False, stop=conn.close)

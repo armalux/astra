@@ -11,7 +11,8 @@ class AstraComponent(ServiceUser):
 
 
 class CommandComponent(AstraComponent, ConsoleCommand):
-    pass
+    def run(self):
+        raise NotImplementedError()
 
 
 component_types = {
@@ -80,7 +81,8 @@ class ModuleLoader:
             if attr not in dct:
                 raise ImportError('Module missing required attribute: {0}'.format(attr))
 
-        return AstraModule(dct['author'], dct['name'], dct['uri'], dct['description'], filename, cls.find_components(dct))
+        return AstraModule(dct['author'], dct['name'], dct['uri'], dct['description'], filename,
+                           cls.find_components(dct))
 
     @classmethod
     def load(cls, path):
@@ -115,6 +117,7 @@ class ModuleLoader:
             else:
                 continue
 
+            # noinspection PyUnresolvedReferences
             components[type_name][value.name] = value
 
         return components

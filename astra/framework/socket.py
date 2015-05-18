@@ -24,7 +24,7 @@ class Socket(socket.socket):
         return socket.inet_ntoa(fcntl.ioctl(
             s.fileno(),
             0x8915,  # SIOCGIFADDR
-            struct.pack('256s', bytes(ifname[:15],'ascii'))
+            struct.pack('256s', bytes(ifname[:15], 'ascii'))
         )[20:24])
 
     @classmethod
@@ -85,10 +85,10 @@ class Socket(socket.socket):
             return
 
         if value:
+            # noinspection PyUnresolvedReferences,PyUnresolvedReferences
             self.ioctl(socket.SIO_RCVALL, socket.RCVALL_ON)
         else:
+            # noinspection PyUnresolvedReferences,PyUnresolvedReferences
             self.ioctl(socket.SIO_RCVALL, socket.RCVALL_OFF)
 
         self.__promiscuous = value
-
-

@@ -16,4 +16,3 @@ class ConnectionsCommand(CommandComponent):
 
     def run(self):
         pass
-

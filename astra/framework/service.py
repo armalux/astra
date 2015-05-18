@@ -109,6 +109,7 @@ class ServiceManager:
 
     def __getattr__(self, key):
         if key in ['__providers', 'parent']:
+            # noinspection PyCallByClass
             return object.__getattribute__(self, key)
 
         return self.__getitem__(key)
@@ -171,5 +172,3 @@ class ServiceUser:
     def services(self, value):
         assert isinstance(value, ServiceManager)
         self.__service_manager = value
-
-

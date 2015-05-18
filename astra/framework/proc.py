@@ -78,7 +78,7 @@ class Callback:
         Will spawn a thread to run the callback.
 
         :param threader: True to spawn a threader, this is good for threads that need to be told when to exit.
-        :param stop_callback: A function to call to stop the thread before joining it.
+        :param stop: A function to call to stop the thread before joining it.
         :return: threading.Thread if threader is False, else astra.framework.proc.Threader
         """
         if stop is not None:
@@ -169,6 +169,7 @@ class Forker:
             if daemonize:
                 os.setsid()
 
+            # noinspection PyBroadException
             try:
                 retval = callback.run()
                 exit_function(retval)
@@ -184,5 +185,3 @@ class Forker:
                 os.waitpid(pid, 0)
 
         return pids
-
-

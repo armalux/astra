@@ -9,7 +9,6 @@ from ..framework.service import ServiceManager
 from ..framework.job import JobManager
 from ..framework.proc import Callback
 
-
 __all__ = ['TestRandomGenerator', 'TestMunger', 'TestServer', 'TestJobManager']
 
 
@@ -18,12 +17,12 @@ class TestRandomGenerator(unittest.TestCase):
         self.assertTrue(isinstance(self.random.system_random, random.SystemRandom))
 
     def test_bytes_length(self):
-        for expected_length in range(1,1000):
+        for expected_length in range(1, 1000):
             data = self.random.bytes(expected_length)
             self.assertTrue(len(data) == expected_length)
 
     def test_bytes_avoid(self):
-        for expected_length in range(1,1000):
+        for expected_length in range(1, 1000):
             avoid_bytes = os.urandom(10)
             data = self.random.bytes(expected_length, avoid=avoid_bytes)
             for b in avoid_bytes:
@@ -42,7 +41,7 @@ class TestRandomGenerator(unittest.TestCase):
         i = self.random.integer(maximum)
         self.assertTrue(minimum <= i <= maximum)
 
-        minimum, maximum = 0, 2**32
+        minimum, maximum = 0, 2 ** 32
         i = self.random.integer()
         self.assertTrue(minimum <= i <= maximum)
 
@@ -58,7 +57,7 @@ class TestRandomGenerator(unittest.TestCase):
     def test_sample_avoid(self):
         length = 100
 
-        for i in range(0,1000):
+        for i in range(0, 1000):
             avoid = os.urandom(10)
             data = self.random.sample(os.urandom(1000), length, avoid)
             for a in avoid:
@@ -193,7 +192,7 @@ class TestJobManager(unittest.TestCase):
     def test_create_job_without_callback(self):
         def factorial(to):
             x = 1
-            for i in range(1,to):
+            for i in range(1, to):
                 x *= i
             return to
 
@@ -209,8 +208,9 @@ class TestJobManager(unittest.TestCase):
                 x *= i
             return x
 
-        def cb(job):
-            self.assertTrue(job.result == 933262154439441526816992388562667004907159682643816214685929638952175999932299156089414639761565182862536979208272237582511852109168640000000000000000000000)
+        def cb(completed_job):
+            self.assertTrue(
+                completed_job.result == 933262154439441526816992388562667004907159682643816214685929638952175999932299156089414639761565182862536979208272237582511852109168640000000000000000000000)
 
         job = self.manager.create(Callback(count, 100), cb)
         job.wait()

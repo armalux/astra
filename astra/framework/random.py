@@ -4,6 +4,7 @@ import binascii
 import math
 
 
+# noinspection PyTypeChecker
 class Random:
     """
     A set of relatively fast random data algorithms.
@@ -40,7 +41,7 @@ class Random:
         integer(min, max)
         """
         if len(args) == 0:
-            minimum, maximum = 0, 2**32
+            minimum, maximum = 0, 2 ** 32
 
         elif len(args) == 1:
             minimum, maximum = 0, args[0]
@@ -93,7 +94,7 @@ class Random:
         """
         Gets upper-case alphabetic ascii secure random bytes.
         """
-        return cls.sample(bytes(range(65,91)), length, avoid)
+        return cls.sample(bytes(range(65, 91)), length, avoid)
 
     @classmethod
     def numeric(cls, length, avoid=b''):
@@ -136,7 +137,7 @@ class Random:
             if length % 2 != 0:
                 length += 1
 
-        return cls.sample(bytes(range(48, 58)) + bytes(range(65,71)), length, avoid)
+        return cls.sample(bytes(range(48, 58)) + bytes(range(65, 71)), length, avoid)
 
     @classmethod
     def base64(cls, length, avoid=b'', decodable=True):
@@ -147,8 +148,7 @@ class Random:
         If decodable=False, will create a bytes string of the exact length specified, but it may not decode.
         """
         if not decodable:
-            return cls.sample(bytes(range(48, 58)) + bytes(range(65, 91)) + bytes(range(97, 123)) + b'+/', length, avoid)
+            return cls.sample(bytes(range(48, 58)) + bytes(range(65, 91)) + bytes(range(97, 123)) + b'+/', length,
+                              avoid)
 
-        return binascii.b2a_base64(cls.bytes(math.ceil(float(length) * (5.0/6.0))))
-
-
+        return binascii.b2a_base64(cls.bytes(math.ceil(float(length) * (5.0 / 6.0))))

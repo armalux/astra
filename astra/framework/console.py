@@ -193,4 +193,3 @@ class Console(ServiceUser):
             self.print(left_padding + content)
 
         self.print('')
-
