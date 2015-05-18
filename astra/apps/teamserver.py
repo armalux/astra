@@ -10,8 +10,22 @@ class TeamserverApplication(Application):
         A team server, from which to launch all operations.
         """
 
-    def run(self):
+    def __init__(self):
+        start = time.clock()
+        # Load Services
         self.services.load()
+
+        services_loaded = time.clock() - start
+
+        # Load all modules.
+        self.services.module.load()
+
+        modules_loaded = time.clock() - services_loaded
+
+        print('Services loaded in {0} ms.'.format(services_loaded*1000))
+        print('Modules loaded in {0} ms.'.format(modules_loaded*1000))
+
+    def run(self):
         ts = TeamServer()
         ts.start()
 
